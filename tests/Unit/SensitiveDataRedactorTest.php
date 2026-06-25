@@ -44,7 +44,7 @@ final class SensitiveDataRedactorTest extends TestCase
     public function test_it_preserves_non_sensitive_values(): void
     {
         $payload = [
-            'amount' => 10000,
+            'quantity' => 10000,
             'description' => 'Package foundation test',
             'nested' => [
                 'status' => 'ok',
@@ -190,6 +190,73 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['refnumber']);
         $this->assertSame('[redacted]', $redacted['trackingCode']);
         $this->assertSame('[redacted]', $redacted['payment_token']);
+        $this->assertSame('visible', $redacted['safe']);
+    }
+
+    public function test_it_redacts_settlement_batch_and_avand_values(): void
+    {
+        $payload = [
+            'track_id' => 'fake-track-id',
+            'tracking_code' => 'fake-tracking-code',
+            'trackingCode' => 'fake-tracking-code',
+            'settlement_id' => 'fake-settlement-id',
+            'settlement_track_id' => 'fake-track-id',
+            'batch_id' => 'fake-batch-id',
+            'batchId' => 'fake-batch-id',
+            'queued_id' => 'fake-queued-id',
+            'queuedId' => 'fake-queued-id',
+            'transactionId' => 'fake-transaction-id',
+            'amount' => 100000,
+            'wage' => 1000,
+            'fee' => 500,
+            'destination_iban' => 'fake-iban',
+            'source_iban' => 'fake-iban',
+            'bank_account' => 'fake-account-number',
+            'account' => 'fake-account-number',
+            'transfer_id' => 'fake-transfer-id',
+            'deposit_id' => 'fake-deposit-id',
+            'suspicious_payment_id' => 'fake-suspicious-payment-id',
+            'payment_identifier' => 'fake-payment-identifier',
+            'cash_in_code' => 'fake-cash-in-code',
+            'balance' => 100000,
+            'last_balance' => 100000,
+            'statement' => 'fake-statement',
+            'realtime_statement' => 'fake-realtime-statement',
+            'label' => 'fake-label',
+            'reference' => 'fake-reference',
+            'safe' => 'visible',
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $this->assertSame('[redacted]', $redacted['track_id']);
+        $this->assertSame('[redacted]', $redacted['tracking_code']);
+        $this->assertSame('[redacted]', $redacted['trackingCode']);
+        $this->assertSame('[redacted]', $redacted['settlement_id']);
+        $this->assertSame('[redacted]', $redacted['settlement_track_id']);
+        $this->assertSame('[redacted]', $redacted['batch_id']);
+        $this->assertSame('[redacted]', $redacted['batchId']);
+        $this->assertSame('[redacted]', $redacted['queued_id']);
+        $this->assertSame('[redacted]', $redacted['queuedId']);
+        $this->assertSame('[redacted]', $redacted['transactionId']);
+        $this->assertSame('[redacted]', $redacted['amount']);
+        $this->assertSame('[redacted]', $redacted['wage']);
+        $this->assertSame('[redacted]', $redacted['fee']);
+        $this->assertSame('[redacted]', $redacted['destination_iban']);
+        $this->assertSame('[redacted]', $redacted['source_iban']);
+        $this->assertSame('[redacted]', $redacted['bank_account']);
+        $this->assertSame('[redacted]', $redacted['account']);
+        $this->assertSame('[redacted]', $redacted['transfer_id']);
+        $this->assertSame('[redacted]', $redacted['deposit_id']);
+        $this->assertSame('[redacted]', $redacted['suspicious_payment_id']);
+        $this->assertSame('[redacted]', $redacted['payment_identifier']);
+        $this->assertSame('[redacted]', $redacted['cash_in_code']);
+        $this->assertSame('[redacted]', $redacted['balance']);
+        $this->assertSame('[redacted]', $redacted['last_balance']);
+        $this->assertSame('[redacted]', $redacted['statement']);
+        $this->assertSame('[redacted]', $redacted['realtime_statement']);
+        $this->assertSame('[redacted]', $redacted['label']);
+        $this->assertSame('[redacted]', $redacted['reference']);
         $this->assertSame('visible', $redacted['safe']);
     }
 }

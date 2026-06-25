@@ -33,8 +33,9 @@ final class PendingVandarRequest
         $method = strtoupper($method);
         $url = $this->joinUrl($this->baseUrl($base), $path);
         $sensitivePathSegments = $this->sensitivePathSegmentsFromOptions($options);
+        $extraSensitiveKeys = $this->extraSensitiveKeysFromOptions($options);
         $options = $this->withoutInternalOptions($options);
-        $safeUrl = $this->redactPathSegments($url, $sensitivePathSegments);
+        $safeUrl = SensitiveUrlSanitizer::sanitize($url, sensitivePathSegments: $sensitivePathSegments);
         $request = $this->http
             ->acceptJson()
             ->asJson()
@@ -67,7 +68,7 @@ final class PendingVandarRequest
                 response: [
                     'method' => $method,
                     'url' => $safeUrl,
-                    'payload' => $this->payloadFromOptions($options),
+                    'payload' => SensitiveDataRedactor::redact($this->payloadFromOptions($options), $extraSensitiveKeys),
                 ],
                 previous: $exception,
             );
@@ -77,14 +78,14 @@ final class PendingVandarRequest
                 response: [
                     'method' => $method,
                     'url' => $safeUrl,
-                    'payload' => $this->payloadFromOptions($options),
+                    'payload' => SensitiveDataRedactor::redact($this->payloadFromOptions($options), $extraSensitiveKeys),
                 ],
                 previous: $exception,
             );
         }
 
         $vandarResponse = $this->toVandarResponse($response);
-        $this->logSummary($method, $safeUrl, $options, $vandarResponse);
+        $this->logSummary($method, $safeUrl, $options, $vandarResponse, $extraSensitiveKeys);
 
         return $vandarResponse;
     }
@@ -130,21 +131,27 @@ final class PendingVandarRequest
     private function withoutInternalOptions(array $options): array
     {
         unset($options['_sensitive_path_segments']);
+        unset($options['_extra_sensitive_keys']);
 
         return $options;
     }
 
     /**
-     * @param  array<int, string>  $segments
+     * @param  array<string, mixed>  $options
+     * @return array<int, string>
      */
-    private function redactPathSegments(string $url, array $segments): string
+    private function extraSensitiveKeysFromOptions(array $options): array
     {
-        foreach ($segments as $segment) {
-            $url = str_replace(rawurlencode($segment), '[redacted]', $url);
-            $url = str_replace($segment, '[redacted]', $url);
+        $keys = $options['_extra_sensitive_keys'] ?? [];
+
+        if (! is_array($keys)) {
+            return [];
         }
 
-        return $url;
+        return array_values(array_filter(
+            array_map(static fn (mixed $key): string => (string) $key, $keys),
+            static fn (string $key): bool => $key !== '',
+        ));
     }
 
     private function toVandarResponse(Response $response): VandarResponse
@@ -175,7 +182,7 @@ final class PendingVandarRequest
     /**
      * @param  array<string, mixed>  $options
      */
-    private function logSummary(string $method, string $url, array $options, VandarResponse $response): void
+    private function logSummary(string $method, string $url, array $options, VandarResponse $response, array $extraSensitiveKeys): void
     {
         if (! (bool) $this->config->get('vandar.logging.enabled', false)) {
             return;
@@ -183,12 +190,12 @@ final class PendingVandarRequest
 
         Log::debug('Vandar HTTP request', SensitiveDataRedactor::redact([
             'method' => $method,
-            'url' => SensitiveUrlSanitizer::sanitize($url),
+            'url' => $url,
             'status' => $response->status(),
             'payload' => $this->payloadFromOptions($options),
             'response' => $response->json(),
             'headers' => $response->headers(),
-        ]));
+        ], $extraSensitiveKeys));
     }
 
     private function intConfig(string $key, int $default): int

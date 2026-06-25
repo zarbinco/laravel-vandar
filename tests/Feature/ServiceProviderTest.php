@@ -8,6 +8,8 @@ use Zarbinco\LaravelVandar\Contracts\TokenStore;
 use Zarbinco\LaravelVandar\Facades\Vandar;
 use Zarbinco\LaravelVandar\Http\VandarClient;
 use Zarbinco\LaravelVandar\LaravelVandar;
+use Zarbinco\LaravelVandar\Resources\AvandResource;
+use Zarbinco\LaravelVandar\Resources\BatchSettlementResource;
 use Zarbinco\LaravelVandar\Resources\BusinessResource;
 use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerFieldResource;
@@ -15,8 +17,10 @@ use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
 use Zarbinco\LaravelVandar\Resources\InquiryResource;
 use Zarbinco\LaravelVandar\Resources\IpgResource;
+use Zarbinco\LaravelVandar\Resources\QueuedSettlementResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Resources\RefundResource;
+use Zarbinco\LaravelVandar\Resources\SettlementResource;
 use Zarbinco\LaravelVandar\Support\IpgApiKeyResolver;
 use Zarbinco\LaravelVandar\Tests\TestCase;
 use Zarbinco\LaravelVandar\Token\TokenManager;
@@ -81,5 +85,18 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(RefundResource::class, $this->app->make(RefundResource::class));
         $this->assertInstanceOf(IpgResource::class, Vandar::ipg());
         $this->assertInstanceOf(RefundResource::class, Vandar::refunds());
+    }
+
+    public function test_it_registers_phase_seven_services(): void
+    {
+        $this->assertInstanceOf(SettlementResource::class, $this->app->make(SettlementResource::class));
+        $this->assertInstanceOf(QueuedSettlementResource::class, $this->app->make(QueuedSettlementResource::class));
+        $this->assertInstanceOf(BatchSettlementResource::class, $this->app->make(BatchSettlementResource::class));
+        $this->assertInstanceOf(AvandResource::class, $this->app->make(AvandResource::class));
+        $this->assertInstanceOf(SettlementResource::class, Vandar::settlements());
+        $this->assertInstanceOf(QueuedSettlementResource::class, Vandar::queuedSettlements());
+        $this->assertInstanceOf(BatchSettlementResource::class, Vandar::batchSettlements());
+        $this->assertInstanceOf(AvandResource::class, Vandar::avand());
+        $this->assertInstanceOf(AvandResource::class, Vandar::cashIn());
     }
 }

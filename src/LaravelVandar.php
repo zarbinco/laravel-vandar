@@ -9,14 +9,18 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Zarbinco\LaravelVandar\DTO\VandarResponse;
 use Zarbinco\LaravelVandar\Exceptions\VandarException;
 use Zarbinco\LaravelVandar\Http\VandarClient;
+use Zarbinco\LaravelVandar\Resources\AvandResource;
+use Zarbinco\LaravelVandar\Resources\BatchSettlementResource;
 use Zarbinco\LaravelVandar\Resources\BusinessResource;
 use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
 use Zarbinco\LaravelVandar\Resources\InquiryResource;
 use Zarbinco\LaravelVandar\Resources\IpgResource;
+use Zarbinco\LaravelVandar\Resources\QueuedSettlementResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Resources\RefundResource;
+use Zarbinco\LaravelVandar\Resources\SettlementResource;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
 final class LaravelVandar
@@ -33,6 +37,10 @@ final class LaravelVandar
         private readonly InquiryResource $inquiries,
         private readonly IpgResource $ipg,
         private readonly RefundResource $refunds,
+        private readonly SettlementResource $settlements,
+        private readonly QueuedSettlementResource $queuedSettlements,
+        private readonly BatchSettlementResource $batchSettlements,
+        private readonly AvandResource $avand,
     ) {}
 
     public function name(): string
@@ -143,6 +151,31 @@ final class LaravelVandar
     public function refunds(): RefundResource
     {
         return $this->refunds;
+    }
+
+    public function settlements(): SettlementResource
+    {
+        return $this->settlements;
+    }
+
+    public function queuedSettlements(): QueuedSettlementResource
+    {
+        return $this->queuedSettlements;
+    }
+
+    public function batchSettlements(): BatchSettlementResource
+    {
+        return $this->batchSettlements;
+    }
+
+    public function avand(): AvandResource
+    {
+        return $this->avand;
+    }
+
+    public function cashIn(): AvandResource
+    {
+        return $this->avand();
     }
 
     /**

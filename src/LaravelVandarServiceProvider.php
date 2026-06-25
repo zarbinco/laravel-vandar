@@ -10,6 +10,8 @@ use Zarbinco\LaravelVandar\Commands\VandarRefreshTokenCommand;
 use Zarbinco\LaravelVandar\Contracts\TokenStore;
 use Zarbinco\LaravelVandar\Http\PendingVandarRequest;
 use Zarbinco\LaravelVandar\Http\VandarClient;
+use Zarbinco\LaravelVandar\Resources\AvandResource;
+use Zarbinco\LaravelVandar\Resources\BatchSettlementResource;
 use Zarbinco\LaravelVandar\Resources\BusinessResource;
 use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerFieldResource;
@@ -17,8 +19,10 @@ use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
 use Zarbinco\LaravelVandar\Resources\InquiryResource;
 use Zarbinco\LaravelVandar\Resources\IpgResource;
+use Zarbinco\LaravelVandar\Resources\QueuedSettlementResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Resources\RefundResource;
+use Zarbinco\LaravelVandar\Resources\SettlementResource;
 use Zarbinco\LaravelVandar\Support\BusinessResolver;
 use Zarbinco\LaravelVandar\Support\IpgApiKeyResolver;
 use Zarbinco\LaravelVandar\Token\CacheTokenStore;
@@ -49,6 +53,10 @@ final class LaravelVandarServiceProvider extends ServiceProvider
         $this->app->singleton(InquiryResource::class);
         $this->app->singleton(IpgResource::class);
         $this->app->singleton(RefundResource::class);
+        $this->app->singleton(SettlementResource::class);
+        $this->app->singleton(QueuedSettlementResource::class);
+        $this->app->singleton(BatchSettlementResource::class);
+        $this->app->singleton(AvandResource::class);
         $this->app->singleton(CustomerResource::class);
 
         $this->app->singleton('vandar', fn ($app): LaravelVandar => new LaravelVandar(
@@ -63,6 +71,10 @@ final class LaravelVandarServiceProvider extends ServiceProvider
             $app->make(InquiryResource::class),
             $app->make(IpgResource::class),
             $app->make(RefundResource::class),
+            $app->make(SettlementResource::class),
+            $app->make(QueuedSettlementResource::class),
+            $app->make(BatchSettlementResource::class),
+            $app->make(AvandResource::class),
         ));
         $this->app->alias('vandar', LaravelVandar::class);
     }

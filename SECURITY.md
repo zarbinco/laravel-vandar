@@ -35,3 +35,11 @@ Payment tokens and transaction IDs should be treated as sensitive. Verification 
 Refund operations are money-moving and should be protected by app-level authorization, audit logging, idempotency controls, and clear operational review.
 
 Package logging redacts known IPG/refund sensitive fields, but consuming applications must redact their own logs, exceptions, audit trails, and error reports too.
+
+Settlement, batch settlement, and Avand/Cash-in payloads may contain sensitive banking and financial data. Never log raw settlement payloads or raw settlement responses.
+
+Package logging redacts known settlement, batch, and cash-in fields, but applications must also redact their own logs, audit trails, exceptions, and error reports.
+
+Money-moving operations must be protected by application-level authorization. Applications should use idempotency keys or internal duplicate-prevention around settlement creation and cancellation.
+
+Applications should keep audit logs that do not expose sensitive banking data. Do not use real settlement, IBAN, account, payout, transfer, batch, or cash-in data in tests, issues, README examples, `REVIEW_NOTES.md`, or zip files.

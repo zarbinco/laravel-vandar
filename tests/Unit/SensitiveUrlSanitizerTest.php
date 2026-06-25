@@ -44,6 +44,50 @@ final class SensitiveUrlSanitizerTest extends TestCase
         $this->assertSame('/path?token=%5Bredacted%5D&refresh_token=%5Bredacted%5D&normal=yes', $url);
     }
 
+    public function test_settlement_query_keys_are_redacted(): void
+    {
+        $url = SensitiveUrlSanitizer::sanitize('/path?track_id=fake-track-id&amount=100000&settlement_id=fake-settlement-id&normal=yes');
+
+        $this->assertSame('/path?track_id=%5Bredacted%5D&amount=%5Bredacted%5D&settlement_id=%5Bredacted%5D&normal=yes', $url);
+    }
+
+    public function test_phase_7a_query_keys_are_redacted(): void
+    {
+        $url = SensitiveUrlSanitizer::sanitize('/path?tracking_code=fake-tracking-code&batchId=fake-batch-id&queued_id=fake-queued-id&suspicious_payment_id=fake-suspicious-id&payment_identifier=fake-payment-id&cash_in_code=fake-code&balance=100000&normal=yes');
+
+        $this->assertSame('/path?tracking_code=%5Bredacted%5D&batchId=%5Bredacted%5D&queued_id=%5Bredacted%5D&suspicious_payment_id=%5Bredacted%5D&payment_identifier=%5Bredacted%5D&cash_in_code=%5Bredacted%5D&balance=%5Bredacted%5D&normal=yes', $url);
+    }
+
+    public function test_sensitive_path_segments_are_redacted_exactly(): void
+    {
+        $url = SensitiveUrlSanitizer::sanitize(
+            '/v4/business/test-business/settlement/fake-track-id',
+            sensitivePathSegments: ['fake-track-id'],
+        );
+
+        $this->assertSame('/v4/business/test-business/settlement/[redacted]', $url);
+    }
+
+    public function test_url_encoded_sensitive_path_segments_are_redacted_after_decoding(): void
+    {
+        $url = SensitiveUrlSanitizer::sanitize(
+            '/v4/business/test-business/settlement/fake%20track%2Fid',
+            sensitivePathSegments: ['fake track/id'],
+        );
+
+        $this->assertSame('/v4/business/test-business/settlement/[redacted]', $url);
+    }
+
+    public function test_sensitive_path_segment_redaction_does_not_replace_substrings(): void
+    {
+        $url = SensitiveUrlSanitizer::sanitize(
+            '/path/prefix-fake-track-id/fake-track-id-suffix/fake-track-id',
+            sensitivePathSegments: ['fake-track-id'],
+        );
+
+        $this->assertSame('/path/prefix-fake-track-id/fake-track-id-suffix/[redacted]', $url);
+    }
+
     public function test_malformed_url_returns_safe_value(): void
     {
         $url = SensitiveUrlSanitizer::sanitize('http://[::1');

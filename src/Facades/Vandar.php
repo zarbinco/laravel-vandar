@@ -23,6 +23,11 @@ use Zarbinco\LaravelVandar\LaravelVandar;
  * @method static \Zarbinco\LaravelVandar\Resources\InquiryResource inquiries()
  * @method static \Zarbinco\LaravelVandar\Resources\IpgResource ipg()
  * @method static \Zarbinco\LaravelVandar\Resources\RefundResource refunds()
+ * @method static \Zarbinco\LaravelVandar\Resources\SettlementResource settlements()
+ * @method static \Zarbinco\LaravelVandar\Resources\QueuedSettlementResource queuedSettlements()
+ * @method static \Zarbinco\LaravelVandar\Resources\BatchSettlementResource batchSettlements()
+ * @method static \Zarbinco\LaravelVandar\Resources\AvandResource avand()
+ * @method static \Zarbinco\LaravelVandar\Resources\AvandResource cashIn()
  * @method static \Zarbinco\LaravelVandar\DTO\VandarResponse response(array $payload = [], int $status = 200, array $headers = [])
  *
  * @see LaravelVandar

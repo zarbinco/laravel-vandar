@@ -4,6 +4,19 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ## Unreleased
 
+- Added Avand settlement-account balance, statement, realtime-statement, transaction-label, identifier cash-in, PIC transaction, and suspicious-payment helpers.
+- Hardened URL logging redaction to replace exact sensitive decoded path segments without broad substring replacement.
+- Added URL path redaction metadata for settlement, queued settlement, batch settlement, Avand, and existing refund dynamic path calls.
+- Expanded sensitive redaction keys for Avand labels, statements, balances, tracking codes, queued IDs, batch IDs, cash-in codes, payment identifiers, and suspicious-payment IDs.
+- Disabled automatic retry for Avand transaction-label and suspicious-payment write operations.
+- Added Phase 7A tests.
+- Added SettlementResource for normal settlement create/status/list/cancel/banks APIs.
+- Added QueuedSettlementResource.
+- Added BatchSettlementResource using the batch base URL.
+- Added AvandResource for cash-in account/deposit/balance APIs.
+- Disabled automatic retry for Phase 7 money-moving endpoints.
+- Hardened redaction keys for settlement, batch, and cash-in payloads/responses.
+- Added Phase 7 tests.
 - Added IpgResource for Vandar IPG send, redirect URL, transaction, and verify APIs.
 - Added RefundResource for IPG transaction refunds.
 - Added IPG api key resolver and exception.

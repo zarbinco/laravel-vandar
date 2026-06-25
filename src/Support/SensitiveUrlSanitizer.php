@@ -24,7 +24,11 @@ final class SensitiveUrlSanitizer
         'card_number',
         'cardnumber',
         'iban',
+        'destination_iban',
+        'source_iban',
         'account_number',
+        'account',
+        'bank_account',
         'national_code',
         'individual_national_code',
         'legal_national_code',
@@ -37,18 +41,36 @@ final class SensitiveUrlSanitizer
         'phone',
         'cid',
         'refnumber',
+        'tracking_code',
         'trackingcode',
         'transaction_id',
         'transid',
+        'track_id',
+        'settlement_id',
+        'settlement_track_id',
+        'batch_id',
+        'batchid',
+        'queued_id',
+        'queuedid',
+        'transfer_id',
+        'deposit_id',
+        'suspicious_payment_id',
+        'payment_identifier',
+        'cash_in_code',
+        'reference',
         'payment_token',
         'callback_token',
+        'balance',
+        'amount',
+        'wage',
+        'fee',
         'signature',
         'image',
         'images',
         'refreshtoken',
     ];
 
-    public static function sanitize(string $url, array $extraSensitiveKeys = []): string
+    public static function sanitize(string $url, array $extraSensitiveKeys = [], array $sensitivePathSegments = []): string
     {
         $parts = parse_url($url);
 
@@ -64,6 +86,7 @@ final class SensitiveUrlSanitizer
             return self::REDACTED_URL;
         }
 
+        $parts['path'] = self::sanitizePath($parts['path'] ?? '', $sensitivePathSegments);
         $query = self::sanitizeQuery($parts['query'] ?? null, $extraSensitiveKeys);
 
         if (isset($parts['host'])) {
@@ -137,6 +160,39 @@ final class SensitiveUrlSanitizer
         $sanitized = self::sanitizeParameters($parameters, $sensitiveKeys);
 
         return http_build_query($sanitized);
+    }
+
+    /**
+     * @param  array<int, mixed>  $sensitivePathSegments
+     */
+    private static function sanitizePath(string $path, array $sensitivePathSegments): string
+    {
+        if ($path === '' || $sensitivePathSegments === []) {
+            return $path;
+        }
+
+        $sensitiveSegments = array_fill_keys(array_values(array_filter(
+            array_map(static fn (mixed $segment): string => (string) $segment, $sensitivePathSegments),
+            static fn (string $segment): bool => $segment !== '',
+        )), true);
+
+        if ($sensitiveSegments === []) {
+            return $path;
+        }
+
+        $segments = explode('/', $path);
+
+        foreach ($segments as $index => $segment) {
+            if ($segment === '') {
+                continue;
+            }
+
+            if (array_key_exists(rawurldecode($segment), $sensitiveSegments)) {
+                $segments[$index] = self::REDACTED;
+            }
+        }
+
+        return implode('/', $segments);
     }
 
     /**
