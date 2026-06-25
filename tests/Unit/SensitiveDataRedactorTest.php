@@ -128,4 +128,37 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['account_number']);
         $this->assertSame('visible', $redacted['safe']);
     }
+
+    public function test_it_redacts_inquiry_identity_banking_and_image_values(): void
+    {
+        $payload = [
+            'national_code' => 'fake-national-code',
+            'individual_national_code' => 'fake-individual-national-code',
+            'legal_national_code' => 'fake-legal-national-code',
+            'fida_code' => 'fake-fida-code',
+            'birthday' => 'fake-birthday',
+            'birth_date' => 'fake-birth-date',
+            'postal_code' => 'fake-postal-code',
+            'card' => 'fake-card',
+            'iban' => 'fake-iban',
+            'image' => 'fake-image',
+            'images' => ['fake-image'],
+            'safe' => 'visible',
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $this->assertSame('[redacted]', $redacted['national_code']);
+        $this->assertSame('[redacted]', $redacted['individual_national_code']);
+        $this->assertSame('[redacted]', $redacted['legal_national_code']);
+        $this->assertSame('[redacted]', $redacted['fida_code']);
+        $this->assertSame('[redacted]', $redacted['birthday']);
+        $this->assertSame('[redacted]', $redacted['birth_date']);
+        $this->assertSame('[redacted]', $redacted['postal_code']);
+        $this->assertSame('[redacted]', $redacted['card']);
+        $this->assertSame('[redacted]', $redacted['iban']);
+        $this->assertSame('[redacted]', $redacted['image']);
+        $this->assertSame('[redacted]', $redacted['images']);
+        $this->assertSame('visible', $redacted['safe']);
+    }
 }

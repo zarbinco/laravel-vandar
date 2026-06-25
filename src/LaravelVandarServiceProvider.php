@@ -15,6 +15,7 @@ use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerFieldResource;
 use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
+use Zarbinco\LaravelVandar\Resources\InquiryResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Support\BusinessResolver;
 use Zarbinco\LaravelVandar\Token\CacheTokenStore;
@@ -41,6 +42,7 @@ final class LaravelVandarServiceProvider extends ServiceProvider
         $this->app->singleton(CustomerFieldResource::class);
         $this->app->singleton(CardResource::class);
         $this->app->singleton(IbanResource::class);
+        $this->app->singleton(InquiryResource::class);
         $this->app->singleton(CustomerResource::class);
 
         $this->app->singleton('vandar', fn ($app): LaravelVandar => new LaravelVandar(
@@ -52,6 +54,7 @@ final class LaravelVandarServiceProvider extends ServiceProvider
             $app->make(CustomerResource::class),
             $app->make(CardResource::class),
             $app->make(IbanResource::class),
+            $app->make(InquiryResource::class),
         ));
         $this->app->alias('vandar', LaravelVandar::class);
     }

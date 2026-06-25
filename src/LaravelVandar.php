@@ -13,6 +13,7 @@ use Zarbinco\LaravelVandar\Resources\BusinessResource;
 use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
+use Zarbinco\LaravelVandar\Resources\InquiryResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
@@ -27,6 +28,7 @@ final class LaravelVandar
         private readonly CustomerResource $customers,
         private readonly CardResource $cards,
         private readonly IbanResource $ibans,
+        private readonly InquiryResource $inquiries,
     ) {}
 
     public function name(): string
@@ -122,6 +124,11 @@ final class LaravelVandar
     public function ibans(): IbanResource
     {
         return $this->ibans;
+    }
+
+    public function inquiries(): InquiryResource
+    {
+        return $this->inquiries;
     }
 
     /**

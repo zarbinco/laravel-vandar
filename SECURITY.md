@@ -21,3 +21,9 @@ Do not commit real customer data to tests or issue reports. Do not use real mobi
 Card and IBAN payloads are sensitive. Package logging redacts `card_number`, `card`, `iban`, `account_number`, `mobile`, `national_code`, token, refresh token, and Authorization-like fields where configured.
 
 Applications should avoid logging raw card or IBAN payloads outside this package. Do not use real card numbers, IBANs, mobile numbers, national codes, or postal codes in tests, issues, README examples, or zip review files.
+
+Inquiry payloads and responses may contain highly sensitive identity, banking, image, and signature data. Do not log raw inquiry payloads or raw inquiry responses.
+
+Package logging redacts known sensitive inquiry fields, including national-code, Fida, birth-date, postal-code, card, IBAN, mobile, image, and signature fields. Consuming applications must still redact their own logs and error reports.
+
+Do not use real customer data in tests, issue reports, README examples, `REVIEW_NOTES.md`, or zip files. Treat identity images and company signature data as sensitive even when they are used only for troubleshooting.

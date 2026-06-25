@@ -24,8 +24,17 @@ final class SensitiveUrlSanitizer
         'iban',
         'account_number',
         'national_code',
+        'individual_national_code',
+        'legal_national_code',
+        'fida_code',
+        'birthday',
+        'birth_date',
+        'postal_code',
         'mobile',
         'phone',
+        'signature',
+        'image',
+        'images',
         'refreshtoken',
     ];
 

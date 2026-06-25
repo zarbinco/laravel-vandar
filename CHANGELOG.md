@@ -4,6 +4,10 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ## Unreleased
 
+- Added InquiryResource for Vandar inquiry services.
+- Added named methods for KYC, Shahkar, NID, NID image, Fida, postal code, company information, company signature, national-code/IBAN, mobile/card, IBAN, card, and card-to-IBAN inquiries.
+- Hardened redaction keys for inquiry payloads and responses.
+- Added inquiry resource tests.
 - Added CardResource for customer card APIs.
 - Added IbanResource for customer IBAN APIs.
 - Added customer-scoped card/IBAN inquiry helpers.

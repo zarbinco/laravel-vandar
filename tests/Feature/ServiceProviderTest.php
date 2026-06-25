@@ -13,6 +13,7 @@ use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerFieldResource;
 use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
+use Zarbinco\LaravelVandar\Resources\InquiryResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Tests\TestCase;
 use Zarbinco\LaravelVandar\Token\TokenManager;
@@ -62,5 +63,11 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(IbanResource::class, Vandar::ibans());
         $this->assertInstanceOf(CardResource::class, Vandar::customers()->cards());
         $this->assertInstanceOf(IbanResource::class, Vandar::customers()->ibans());
+    }
+
+    public function test_it_registers_phase_five_services(): void
+    {
+        $this->assertInstanceOf(InquiryResource::class, $this->app->make(InquiryResource::class));
+        $this->assertInstanceOf(InquiryResource::class, Vandar::inquiries());
     }
 }
