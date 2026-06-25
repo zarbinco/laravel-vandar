@@ -2,6 +2,14 @@
 
 This package is unofficial and is not affiliated with Vandar. Examples use fake placeholder values only.
 
+## Installation
+
+The package is available on Packagist:
+
+```bash
+composer require zarbinco/laravel-vandar
+```
+
 ## Business
 
 ```php

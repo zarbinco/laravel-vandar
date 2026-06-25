@@ -16,6 +16,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ### Changed
 
+- Updated documentation for Packagist installation and auto-update setup.
 - Improved package documentation, security guidance, and contribution workflow.
 - Improved URL and payload handling for package logs and exception context.
 

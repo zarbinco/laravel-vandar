@@ -6,6 +6,8 @@ Treat this SDK as a transport layer. Your application remains responsible for au
 
 Never commit real Vandar access tokens, refresh tokens, IPG API keys, callback URLs, or bearer values. Refresh tokens and IPG API keys are secrets.
 
+Packagist and GitHub tokens used for package auto-update are maintainer secrets. Prefer the built-in GitHub and Packagist integration where possible, and never commit those tokens to source code, docs, tests, issues, or screenshots.
+
 ## Private Data
 
 Customer identity, card, IBAN, mobile, postal, inquiry image, company signature, statement, settlement, cash-in, batch, and refund data are sensitive. Use fake placeholder values in tests and issue reports.

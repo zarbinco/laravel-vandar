@@ -24,6 +24,8 @@ This package is unofficial and is not affiliated with Vandar.
 
 ## Installation
 
+The package is published on Packagist as `zarbinco/laravel-vandar`.
+
 ```bash
 composer require zarbinco/laravel-vandar
 ```
@@ -33,6 +35,14 @@ Publish the configuration file:
 ```bash
 php artisan vendor:publish --tag=vandar-config
 ```
+
+## Packagist Auto-Update
+
+Packagist auto-update is configured outside the package code. To keep Packagist synced with GitHub pushes, enable the GitHub Hook or auto-update integration from the `zarbinco/laravel-vandar` package page on Packagist.
+
+If manual webhook setup is needed, use Packagist's official webhook and update instructions from the package maintain page. Never commit Packagist API tokens or GitHub tokens into this repository.
+
+After pushing a tag such as `v0.1.0`, check the package page on Packagist to confirm the new version appears.
 
 ## Configuration
 
