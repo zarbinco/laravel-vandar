@@ -17,3 +17,7 @@ URLs may contain sensitive query parameters and are sanitized before package log
 Customer payloads may contain sensitive personal data. The package redacts sensitive fields in package logging, but applications should avoid logging raw customer payloads outside this package.
 
 Do not commit real customer data to tests or issue reports. Do not use real mobile numbers, national codes, card numbers, IBANs, or postal data in examples.
+
+Card and IBAN payloads are sensitive. Package logging redacts `card_number`, `card`, `iban`, `account_number`, `mobile`, `national_code`, token, refresh token, and Authorization-like fields where configured.
+
+Applications should avoid logging raw card or IBAN payloads outside this package. Do not use real card numbers, IBANs, mobile numbers, national codes, or postal codes in tests, issues, README examples, or zip review files.

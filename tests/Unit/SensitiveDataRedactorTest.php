@@ -111,4 +111,21 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['headers']['Api-Key']);
         $this->assertSame('[redacted]', $redacted['headers']['Authorization']);
     }
+
+    public function test_it_redacts_card_iban_and_account_values(): void
+    {
+        $payload = [
+            'card' => 'fake-card',
+            'iban' => 'fake-iban',
+            'account_number' => 'fake-account-number',
+            'safe' => 'visible',
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $this->assertSame('[redacted]', $redacted['card']);
+        $this->assertSame('[redacted]', $redacted['iban']);
+        $this->assertSame('[redacted]', $redacted['account_number']);
+        $this->assertSame('visible', $redacted['safe']);
+    }
 }

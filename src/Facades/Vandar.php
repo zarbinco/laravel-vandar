@@ -18,6 +18,8 @@ use Zarbinco\LaravelVandar\LaravelVandar;
  * @method static \Zarbinco\LaravelVandar\Resources\RawResource raw()
  * @method static \Zarbinco\LaravelVandar\Resources\BusinessResource business()
  * @method static \Zarbinco\LaravelVandar\Resources\CustomerResource customers()
+ * @method static \Zarbinco\LaravelVandar\Resources\CardResource cards()
+ * @method static \Zarbinco\LaravelVandar\Resources\IbanResource ibans()
  * @method static \Zarbinco\LaravelVandar\DTO\VandarResponse response(array $payload = [], int $status = 200, array $headers = [])
  *
  * @see LaravelVandar

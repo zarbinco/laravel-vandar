@@ -15,6 +15,8 @@ final class CustomerResource
         private readonly VandarClient $client,
         private readonly BusinessResolver $business,
         private readonly CustomerFieldResource $fields,
+        private readonly CardResource $cards,
+        private readonly IbanResource $ibans,
     ) {}
 
     /**
@@ -99,6 +101,16 @@ final class CustomerResource
     public function fields(): CustomerFieldResource
     {
         return $this->fields;
+    }
+
+    public function cards(): CardResource
+    {
+        return $this->cards;
+    }
+
+    public function ibans(): IbanResource
+    {
+        return $this->ibans;
     }
 
     public function walletBalance(string|int $customer, ?string $business = null): VandarResponse

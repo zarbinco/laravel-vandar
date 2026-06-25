@@ -4,6 +4,12 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ## Unreleased
 
+- Added CardResource for customer card APIs.
+- Added IbanResource for customer IBAN APIs.
+- Added customer-scoped card/IBAN inquiry helpers.
+- Added customer-scoped card-to-IBAN helper.
+- Added tests for card and IBAN resources.
+- Hardened redaction keys for card/account data.
 - Added BusinessResource.
 - Added CustomerResource.
 - Added CustomerFieldResource.

@@ -10,7 +10,9 @@ use Zarbinco\LaravelVandar\DTO\VandarResponse;
 use Zarbinco\LaravelVandar\Exceptions\VandarException;
 use Zarbinco\LaravelVandar\Http\VandarClient;
 use Zarbinco\LaravelVandar\Resources\BusinessResource;
+use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerResource;
+use Zarbinco\LaravelVandar\Resources\IbanResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
@@ -23,6 +25,8 @@ final class LaravelVandar
         private readonly RawResource $raw,
         private readonly BusinessResource $business,
         private readonly CustomerResource $customers,
+        private readonly CardResource $cards,
+        private readonly IbanResource $ibans,
     ) {}
 
     public function name(): string
@@ -108,6 +112,16 @@ final class LaravelVandar
     public function customers(): CustomerResource
     {
         return $this->customers;
+    }
+
+    public function cards(): CardResource
+    {
+        return $this->cards;
+    }
+
+    public function ibans(): IbanResource
+    {
+        return $this->ibans;
     }
 
     /**
