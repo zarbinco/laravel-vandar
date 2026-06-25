@@ -13,6 +13,10 @@ use Zarbinco\LaravelVandar\LaravelVandar;
  * @method static mixed config(?string $key = null, mixed $default = null)
  * @method static string baseUrl(string $name = 'api')
  * @method static bool isLoggingEnabled()
+ * @method static \Zarbinco\LaravelVandar\Http\VandarClient client()
+ * @method static \Zarbinco\LaravelVandar\Token\TokenManager tokens()
+ * @method static \Zarbinco\LaravelVandar\Resources\RawResource raw()
+ * @method static \Zarbinco\LaravelVandar\DTO\VandarResponse response(array $payload = [], int $status = 200, array $headers = [])
  *
  * @see LaravelVandar
  */

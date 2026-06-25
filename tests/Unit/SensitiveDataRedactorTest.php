@@ -81,4 +81,34 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['CARD_NUMBER']);
         $this->assertTrue($redacted['safe']);
     }
+
+    public function test_it_redacts_authorization_and_refresh_token_endpoint_keys(): void
+    {
+        $payload = [
+            'Authorization' => 'Bearer fake-access-token',
+            'refreshtoken' => 'fake-refresh-token',
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $this->assertSame('[redacted]', $redacted['Authorization']);
+        $this->assertSame('[redacted]', $redacted['refreshtoken']);
+    }
+
+    public function test_it_redacts_api_key_headers_and_nested_authorization_headers(): void
+    {
+        $payload = [
+            'X-Api-Key' => 'fake-api-key',
+            'headers' => [
+                'Api-Key' => 'fake-api-key',
+                'Authorization' => 'Bearer fake-authorization-token',
+            ],
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $this->assertSame('[redacted]', $redacted['X-Api-Key']);
+        $this->assertSame('[redacted]', $redacted['headers']['Api-Key']);
+        $this->assertSame('[redacted]', $redacted['headers']['Authorization']);
+    }
 }

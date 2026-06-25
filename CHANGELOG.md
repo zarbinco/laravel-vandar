@@ -4,6 +4,16 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ## Unreleased
 
+- Hardened URL sanitization for package logging.
+- Hardened exception context redaction.
+- Added tests for sensitive URL, log, and exception redaction.
+- Added generic HTTP client foundation.
+- Added VandarResponse DTO.
+- Added token store abstraction.
+- Added config/cache token stores.
+- Added token manager and refresh-token command.
+- Added RawResource for advanced generic requests.
+- Added exception mapping and related tests.
 - Renamed package owner, Composer package name, and PHP namespace from mrezdev/Mrezdev to zarbinco/Zarbinco.
 - Added the Phase 1 Laravel package foundation.
 - Added package service provider, facade, root SDK object, configuration file, and about command.

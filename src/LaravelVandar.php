@@ -6,12 +6,19 @@ namespace Zarbinco\LaravelVandar;
 
 use Composer\InstalledVersions;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Zarbinco\LaravelVandar\DTO\VandarResponse;
 use Zarbinco\LaravelVandar\Exceptions\VandarException;
+use Zarbinco\LaravelVandar\Http\VandarClient;
+use Zarbinco\LaravelVandar\Resources\RawResource;
+use Zarbinco\LaravelVandar\Token\TokenManager;
 
 final class LaravelVandar
 {
     public function __construct(
         private readonly ConfigRepository $configRepository,
+        private readonly VandarClient $client,
+        private readonly TokenManager $tokens,
+        private readonly RawResource $raw,
     ) {}
 
     public function name(): string
@@ -72,5 +79,29 @@ final class LaravelVandar
     public function isLoggingEnabled(): bool
     {
         return (bool) $this->config('logging.enabled', false);
+    }
+
+    public function client(): VandarClient
+    {
+        return $this->client;
+    }
+
+    public function tokens(): TokenManager
+    {
+        return $this->tokens;
+    }
+
+    public function raw(): RawResource
+    {
+        return $this->raw;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $headers
+     */
+    public function response(array $payload = [], int $status = 200, array $headers = []): VandarResponse
+    {
+        return new VandarResponse($status, $payload, $headers);
     }
 }
