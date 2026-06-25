@@ -1,0 +1,41 @@
+{
+    "name": "zarbinco/laravel-vandar",
+    "description": "An unofficial Laravel SDK for Vandar APIs.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^10.5|^11.0|^12.0",
+        "laravel/pint": "^1.18"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zarbinco\\LaravelVandar\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Zarbinco\\LaravelVandar\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Zarbinco\\LaravelVandar\\LaravelVandarServiceProvider"
+            ],
+            "aliases": {
+                "Vandar": "Zarbinco\\LaravelVandar\\Facades\\Vandar"
+            }
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "format": "vendor/bin/pint"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
