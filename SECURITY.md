@@ -27,3 +27,11 @@ Inquiry payloads and responses may contain highly sensitive identity, banking, i
 Package logging redacts known sensitive inquiry fields, including national-code, Fida, birth-date, postal-code, card, IBAN, mobile, image, and signature fields. Consuming applications must still redact their own logs and error reports.
 
 Do not use real customer data in tests, issue reports, README examples, `REVIEW_NOTES.md`, or zip files. Treat identity images and company signature data as sensitive even when they are used only for troubleshooting.
+
+IPG `api_key` values are secrets. Never commit `VANDAR_IPG_API_KEY`, never print it in command output, and never log raw payment payloads.
+
+Payment tokens and transaction IDs should be treated as sensitive. Verification responses may include card/payment data and must be handled carefully.
+
+Refund operations are money-moving and should be protected by app-level authorization, audit logging, idempotency controls, and clear operational review.
+
+Package logging redacts known IPG/refund sensitive fields, but consuming applications must redact their own logs, exceptions, audit trails, and error reports too.

@@ -21,6 +21,8 @@ use Zarbinco\LaravelVandar\LaravelVandar;
  * @method static \Zarbinco\LaravelVandar\Resources\CardResource cards()
  * @method static \Zarbinco\LaravelVandar\Resources\IbanResource ibans()
  * @method static \Zarbinco\LaravelVandar\Resources\InquiryResource inquiries()
+ * @method static \Zarbinco\LaravelVandar\Resources\IpgResource ipg()
+ * @method static \Zarbinco\LaravelVandar\Resources\RefundResource refunds()
  * @method static \Zarbinco\LaravelVandar\DTO\VandarResponse response(array $payload = [], int $status = 200, array $headers = [])
  *
  * @see LaravelVandar

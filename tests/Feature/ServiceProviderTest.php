@@ -14,7 +14,10 @@ use Zarbinco\LaravelVandar\Resources\CustomerFieldResource;
 use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
 use Zarbinco\LaravelVandar\Resources\InquiryResource;
+use Zarbinco\LaravelVandar\Resources\IpgResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
+use Zarbinco\LaravelVandar\Resources\RefundResource;
+use Zarbinco\LaravelVandar\Support\IpgApiKeyResolver;
 use Zarbinco\LaravelVandar\Tests\TestCase;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
@@ -69,5 +72,14 @@ final class ServiceProviderTest extends TestCase
     {
         $this->assertInstanceOf(InquiryResource::class, $this->app->make(InquiryResource::class));
         $this->assertInstanceOf(InquiryResource::class, Vandar::inquiries());
+    }
+
+    public function test_it_registers_phase_six_services(): void
+    {
+        $this->assertInstanceOf(IpgApiKeyResolver::class, $this->app->make(IpgApiKeyResolver::class));
+        $this->assertInstanceOf(IpgResource::class, $this->app->make(IpgResource::class));
+        $this->assertInstanceOf(RefundResource::class, $this->app->make(RefundResource::class));
+        $this->assertInstanceOf(IpgResource::class, Vandar::ipg());
+        $this->assertInstanceOf(RefundResource::class, Vandar::refunds());
     }
 }

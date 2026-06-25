@@ -95,6 +95,6 @@ class VandarException extends RuntimeException
             return false;
         }
 
-        return preg_match('/(access[_-]?token|refresh[_-]?token|refreshtoken|authorization|bearer|api[_-]?key|card[_-]?number|iban|national[_-]?code|fida|birth[_-]?date|birthday|postal[_-]?code|mobile|phone|signature|image)/i', $value) === 1;
+        return preg_match('/(access[_-]?token|refresh[_-]?token|refreshtoken|authorization|bearer|api[_-]?key|card[_-]?number|cardnumber|valid[_-]?card[_-]?number|iban|national[_-]?code|fida|birth[_-]?date|birthday|postal[_-]?code|mobile|phone|cid|refnumber|trackingcode|transaction[_-]?id|transid|payment[_-]?token|callback[_-]?token|signature|image)/i', $value) === 1;
     }
 }

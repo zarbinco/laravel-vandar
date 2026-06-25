@@ -28,10 +28,13 @@ final class PendingVandarRequest
     /**
      * @param  array<string, mixed>  $options
      */
-    public function send(string $method, string $base, string $path, array $options = [], bool $auth = true): VandarResponse
+    public function send(string $method, string $base, string $path, array $options = [], bool $auth = true, bool $allowRetry = true): VandarResponse
     {
         $method = strtoupper($method);
         $url = $this->joinUrl($this->baseUrl($base), $path);
+        $sensitivePathSegments = $this->sensitivePathSegmentsFromOptions($options);
+        $options = $this->withoutInternalOptions($options);
+        $safeUrl = $this->redactPathSegments($url, $sensitivePathSegments);
         $request = $this->http
             ->acceptJson()
             ->asJson()
@@ -39,7 +42,7 @@ final class PendingVandarRequest
             ->connectTimeout($this->intConfig('vandar.http.connect_timeout', 10))
             ->withOptions(['verify' => (bool) $this->config->get('vandar.http.verify_ssl', true)]);
 
-        if ($method === 'GET' && (bool) $this->config->get('vandar.http.retry.enabled', false)) {
+        if ($allowRetry && $method === 'GET' && (bool) $this->config->get('vandar.http.retry.enabled', false)) {
             $request = $request->retry(
                 $this->intConfig('vandar.http.retry.times', 1),
                 $this->intConfig('vandar.http.retry.sleep_ms', 500),
@@ -63,7 +66,7 @@ final class PendingVandarRequest
                 message: 'Unable to connect to Vandar.',
                 response: [
                     'method' => $method,
-                    'url' => $url,
+                    'url' => $safeUrl,
                     'payload' => $this->payloadFromOptions($options),
                 ],
                 previous: $exception,
@@ -73,7 +76,7 @@ final class PendingVandarRequest
                 message: 'Vandar HTTP request failed.',
                 response: [
                     'method' => $method,
-                    'url' => $url,
+                    'url' => $safeUrl,
                     'payload' => $this->payloadFromOptions($options),
                 ],
                 previous: $exception,
@@ -81,7 +84,7 @@ final class PendingVandarRequest
         }
 
         $vandarResponse = $this->toVandarResponse($response);
-        $this->logSummary($method, $url, $options, $vandarResponse);
+        $this->logSummary($method, $safeUrl, $options, $vandarResponse);
 
         return $vandarResponse;
     }
@@ -100,6 +103,48 @@ final class PendingVandarRequest
     private function joinUrl(string $baseUrl, string $path): string
     {
         return rtrim($baseUrl, '/').'/'.ltrim($path, '/');
+    }
+
+    /**
+     * @param  array<string, mixed>  $options
+     * @return array<int, string>
+     */
+    private function sensitivePathSegmentsFromOptions(array $options): array
+    {
+        $segments = $options['_sensitive_path_segments'] ?? [];
+
+        if (! is_array($segments)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map(static fn (mixed $segment): string => (string) $segment, $segments),
+            static fn (string $segment): bool => $segment !== '',
+        ));
+    }
+
+    /**
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
+    private function withoutInternalOptions(array $options): array
+    {
+        unset($options['_sensitive_path_segments']);
+
+        return $options;
+    }
+
+    /**
+     * @param  array<int, string>  $segments
+     */
+    private function redactPathSegments(string $url, array $segments): string
+    {
+        foreach ($segments as $segment) {
+            $url = str_replace(rawurlencode($segment), '[redacted]', $url);
+            $url = str_replace($segment, '[redacted]', $url);
+        }
+
+        return $url;
     }
 
     private function toVandarResponse(Response $response): VandarResponse

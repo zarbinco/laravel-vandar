@@ -35,6 +35,11 @@ return [
         'subscription' => env('VANDAR_SUBSCRIPTION_URL', 'https://subscription.vandar.io'),
     ],
 
+    'ipg' => [
+        'api_key' => env('VANDAR_IPG_API_KEY'),
+        'callback_url' => env('VANDAR_IPG_CALLBACK_URL'),
+    ],
+
     'http' => [
         'timeout' => (int) env('VANDAR_HTTP_TIMEOUT', 20),
         'connect_timeout' => (int) env('VANDAR_HTTP_CONNECT_TIMEOUT', 10),

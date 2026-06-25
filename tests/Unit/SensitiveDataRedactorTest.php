@@ -161,4 +161,35 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['images']);
         $this->assertSame('visible', $redacted['safe']);
     }
+
+    public function test_it_redacts_ipg_and_refund_values(): void
+    {
+        $payload = [
+            'api_key' => 'fake-ipg-api-key',
+            'valid_card_number' => 'fake-card',
+            'mobile_number' => 'fake-mobile',
+            'cardNumber' => 'fake-card',
+            'CID' => 'fake-cid',
+            'cid' => 'fake-cid',
+            'transId' => 'fake-trans-id',
+            'refnumber' => 'fake-refnumber',
+            'trackingCode' => 'fake-track-id',
+            'payment_token' => 'fake-payment-token',
+            'safe' => 'visible',
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $this->assertSame('[redacted]', $redacted['api_key']);
+        $this->assertSame('[redacted]', $redacted['valid_card_number']);
+        $this->assertSame('[redacted]', $redacted['mobile_number']);
+        $this->assertSame('[redacted]', $redacted['cardNumber']);
+        $this->assertSame('[redacted]', $redacted['CID']);
+        $this->assertSame('[redacted]', $redacted['cid']);
+        $this->assertSame('[redacted]', $redacted['transId']);
+        $this->assertSame('[redacted]', $redacted['refnumber']);
+        $this->assertSame('[redacted]', $redacted['trackingCode']);
+        $this->assertSame('[redacted]', $redacted['payment_token']);
+        $this->assertSame('visible', $redacted['safe']);
+    }
 }

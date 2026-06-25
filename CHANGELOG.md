@@ -4,6 +4,13 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ## Unreleased
 
+- Added IpgResource for Vandar IPG send, redirect URL, transaction, and verify APIs.
+- Added RefundResource for IPG transaction refunds.
+- Added IPG api key resolver and exception.
+- Added callback helper methods.
+- Disabled automatic retry for Phase 6 money-moving endpoints.
+- Hardened redaction keys for IPG/refund payloads and responses.
+- Added IPG and refund tests.
 - Added InquiryResource for Vandar inquiry services.
 - Added named methods for KYC, Shahkar, NID, NID image, Fida, postal code, company information, company signature, national-code/IBAN, mobile/card, IBAN, card, and card-to-IBAN inquiries.
 - Hardened redaction keys for inquiry payloads and responses.

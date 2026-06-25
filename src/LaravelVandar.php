@@ -14,7 +14,9 @@ use Zarbinco\LaravelVandar\Resources\CardResource;
 use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\IbanResource;
 use Zarbinco\LaravelVandar\Resources\InquiryResource;
+use Zarbinco\LaravelVandar\Resources\IpgResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
+use Zarbinco\LaravelVandar\Resources\RefundResource;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
 final class LaravelVandar
@@ -29,6 +31,8 @@ final class LaravelVandar
         private readonly CardResource $cards,
         private readonly IbanResource $ibans,
         private readonly InquiryResource $inquiries,
+        private readonly IpgResource $ipg,
+        private readonly RefundResource $refunds,
     ) {}
 
     public function name(): string
@@ -129,6 +133,16 @@ final class LaravelVandar
     public function inquiries(): InquiryResource
     {
         return $this->inquiries;
+    }
+
+    public function ipg(): IpgResource
+    {
+        return $this->ipg;
+    }
+
+    public function refunds(): RefundResource
+    {
+        return $this->refunds;
     }
 
     /**
