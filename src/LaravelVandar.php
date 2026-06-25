@@ -9,6 +9,8 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Zarbinco\LaravelVandar\DTO\VandarResponse;
 use Zarbinco\LaravelVandar\Exceptions\VandarException;
 use Zarbinco\LaravelVandar\Http\VandarClient;
+use Zarbinco\LaravelVandar\Resources\BusinessResource;
+use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
@@ -19,6 +21,8 @@ final class LaravelVandar
         private readonly VandarClient $client,
         private readonly TokenManager $tokens,
         private readonly RawResource $raw,
+        private readonly BusinessResource $business,
+        private readonly CustomerResource $customers,
     ) {}
 
     public function name(): string
@@ -94,6 +98,16 @@ final class LaravelVandar
     public function raw(): RawResource
     {
         return $this->raw;
+    }
+
+    public function business(): BusinessResource
+    {
+        return $this->business;
+    }
+
+    public function customers(): CustomerResource
+    {
+        return $this->customers;
     }
 
     /**

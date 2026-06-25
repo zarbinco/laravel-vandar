@@ -29,7 +29,82 @@ Vandar::baseUrl('api');
 
 ## HTTP Foundation
 
-Phase 2 adds the generic HTTP and token-management foundation that future resources will use. It does not add named business, customer, card, IBAN, inquiry, IPG, settlement, or direct debit endpoint resources yet.
+Phase 2 adds the generic HTTP and token-management foundation that future resources use. Phase 3 adds business and customer resources while card, IBAN, inquiry, IPG, settlement, and direct debit resources remain future work.
+
+## Business resource
+
+```php
+use Zarbinco\LaravelVandar\Facades\Vandar;
+
+$info = Vandar::business()->info();
+$users = Vandar::business()->users();
+$balance = Vandar::business()->balance();
+$transactions = Vandar::business()->transactions(['page' => 1]);
+```
+
+## Customer resource
+
+```php
+use Zarbinco\LaravelVandar\Facades\Vandar;
+
+$customers = Vandar::customers()->list(['page' => 1]);
+
+$customer = Vandar::customers()->createIndividual([
+    'first_name' => 'Test',
+    'last_name' => 'User',
+    'mobile' => 'fake-mobile',
+    'individual_national_code' => 'fake-national-code',
+]);
+
+$legal = Vandar::customers()->createLegal([
+    'legal_name' => 'Test Company',
+    'agent_name' => 'Test Agent',
+    'agent_mobile' => 'fake-agent-mobile',
+    'legal_national_code' => 'fake-legal-code',
+]);
+
+$found = Vandar::customers()->find('customer-id');
+$updated = Vandar::customers()->update('customer-id', ['first_name' => 'Updated']);
+$deleted = Vandar::customers()->delete('customer-id');
+```
+
+The package does not validate or normalize Iranian identifiers in Phase 3. Vandar should validate customer fields, national codes, mobiles, and related values.
+
+## Customer custom fields
+
+```php
+$fields = Vandar::customers()->fields()->list();
+$field = Vandar::customers()->fields()->create(['name' => 'Test Field']);
+$updated = Vandar::customers()->fields()->update('field-id', ['name' => 'Updated Field']);
+$found = Vandar::customers()->fields()->find('field-id');
+$deleted = Vandar::customers()->fields()->delete('field-id');
+```
+
+## Customer wallet/account
+
+```php
+$wallet = Vandar::customers()->walletBalance('customer-id');
+
+$deposit = Vandar::customers()->walletDeposit('customer-id', [
+    'amount' => 1000,
+    'track_id' => 'fake-track-id',
+]);
+
+$withdraw = Vandar::customers()->walletWithdraw('customer-id', [
+    'amount' => 500,
+    'track_id' => 'fake-track-id',
+]);
+```
+
+## Customer transactions
+
+```php
+$transactions = Vandar::customers()->transactions('customer-id', ['page' => 1]);
+```
+
+Customer transactions follow the current Vandar docs and use `POST /v2/business/{business}/customers/{customer}/transactions`.
+
+The package does not persist customer data. Your Laravel application remains responsible for its own models, workflows, authorization, and storage.
 
 ## Raw Requests
 

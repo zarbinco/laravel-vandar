@@ -13,3 +13,7 @@ Package commands never print access tokens or refresh tokens. When package loggi
 A database token store is not included in Phase 2. Any future database-backed token store must encrypt token columns.
 
 URLs may contain sensitive query parameters and are sanitized before package logging. Exception context is redacted by default. Users should avoid passing secrets in query strings when possible.
+
+Customer payloads may contain sensitive personal data. The package redacts sensitive fields in package logging, but applications should avoid logging raw customer payloads outside this package.
+
+Do not commit real customer data to tests or issue reports. Do not use real mobile numbers, national codes, card numbers, IBANs, or postal data in examples.

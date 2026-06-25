@@ -4,6 +4,11 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ## Unreleased
 
+- Added BusinessResource.
+- Added CustomerResource.
+- Added CustomerFieldResource.
+- Added BusinessResolver and VandarPath helpers.
+- Added tests for business/customer resources.
 - Hardened URL sanitization for package logging.
 - Hardened exception context redaction.
 - Added tests for sensitive URL, log, and exception redaction.

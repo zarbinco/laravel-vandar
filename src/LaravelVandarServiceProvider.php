@@ -10,7 +10,11 @@ use Zarbinco\LaravelVandar\Commands\VandarRefreshTokenCommand;
 use Zarbinco\LaravelVandar\Contracts\TokenStore;
 use Zarbinco\LaravelVandar\Http\PendingVandarRequest;
 use Zarbinco\LaravelVandar\Http\VandarClient;
+use Zarbinco\LaravelVandar\Resources\BusinessResource;
+use Zarbinco\LaravelVandar\Resources\CustomerFieldResource;
+use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
+use Zarbinco\LaravelVandar\Support\BusinessResolver;
 use Zarbinco\LaravelVandar\Token\CacheTokenStore;
 use Zarbinco\LaravelVandar\Token\ConfigTokenStore;
 use Zarbinco\LaravelVandar\Token\TokenManager;
@@ -30,12 +34,18 @@ final class LaravelVandarServiceProvider extends ServiceProvider
         $this->app->singleton(VandarClient::class);
         $this->app->singleton(TokenManager::class);
         $this->app->singleton(RawResource::class);
+        $this->app->singleton(BusinessResolver::class);
+        $this->app->singleton(BusinessResource::class);
+        $this->app->singleton(CustomerFieldResource::class);
+        $this->app->singleton(CustomerResource::class);
 
         $this->app->singleton('vandar', fn ($app): LaravelVandar => new LaravelVandar(
             $app['config'],
             $app->make(VandarClient::class),
             $app->make(TokenManager::class),
             $app->make(RawResource::class),
+            $app->make(BusinessResource::class),
+            $app->make(CustomerResource::class),
         ));
         $this->app->alias('vandar', LaravelVandar::class);
     }

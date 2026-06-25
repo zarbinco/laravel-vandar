@@ -8,6 +8,9 @@ use Zarbinco\LaravelVandar\Contracts\TokenStore;
 use Zarbinco\LaravelVandar\Facades\Vandar;
 use Zarbinco\LaravelVandar\Http\VandarClient;
 use Zarbinco\LaravelVandar\LaravelVandar;
+use Zarbinco\LaravelVandar\Resources\BusinessResource;
+use Zarbinco\LaravelVandar\Resources\CustomerFieldResource;
+use Zarbinco\LaravelVandar\Resources\CustomerResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Tests\TestCase;
 use Zarbinco\LaravelVandar\Token\TokenManager;
@@ -38,5 +41,14 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(TokenManager::class, $this->app->make(TokenManager::class));
         $this->assertInstanceOf(TokenStore::class, $this->app->make(TokenStore::class));
         $this->assertInstanceOf(RawResource::class, $this->app->make(RawResource::class));
+    }
+
+    public function test_it_registers_phase_three_services(): void
+    {
+        $this->assertInstanceOf(BusinessResource::class, $this->app->make(BusinessResource::class));
+        $this->assertInstanceOf(CustomerResource::class, $this->app->make(CustomerResource::class));
+        $this->assertInstanceOf(CustomerFieldResource::class, $this->app->make(CustomerFieldResource::class));
+        $this->assertInstanceOf(BusinessResource::class, Vandar::business());
+        $this->assertInstanceOf(CustomerResource::class, Vandar::customers());
     }
 }
