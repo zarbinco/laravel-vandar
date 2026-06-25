@@ -1,0 +1,51 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.2'
+            dependencies: lowest
+            composer-options: --prefer-lowest --prefer-stable
+          - php: '8.2'
+            dependencies: stable
+            composer-options: --prefer-stable
+          - php: '8.3'
+            dependencies: stable
+            composer-options: --prefer-stable
+          - php: '8.4'
+            dependencies: stable
+            composer-options: --prefer-stable
+
+    name: PHP ${{ matrix.php }} / ${{ matrix.dependencies }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate Composer
+        run: composer validate --strict
+
+      - name: Install Dependencies
+        run: composer update ${{ matrix.composer-options }} --prefer-dist --no-interaction --no-progress
+
+      - name: Run Pint
+        run: vendor/bin/pint --test
+
+      - name: Run Tests
+        run: vendor/bin/phpunit

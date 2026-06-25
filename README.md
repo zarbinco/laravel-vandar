@@ -1,12 +1,28 @@
 # Laravel Vandar SDK
 
+[![Tests](https://github.com/zarbinco/laravel-vandar/actions/workflows/tests.yml/badge.svg)](https://github.com/zarbinco/laravel-vandar/actions/workflows/tests.yml)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/zarbinco/laravel-vandar.svg)](https://packagist.org/packages/zarbinco/laravel-vandar)
+[![License](https://img.shields.io/github/license/zarbinco/laravel-vandar.svg)](LICENSE.md)
+
 This package is unofficial and is not affiliated with Vandar.
 
-An unofficial Laravel SDK foundation for Vandar APIs. The package is designed to support IPG, settlements, customers, cards, IBANs, inquiries, direct debit, token refresh, and testing utilities over future phases.
+`zarbinco/laravel-vandar` is an SDK-first Laravel package for Vandar APIs. It provides a small HTTP foundation, token refresh support, named API resources, safe response objects, redacted package logging, and testing fakes.
+
+## Features
+
+- HTTP client and raw request helper
+- Access/refresh token management
+- Business APIs
+- Customers and customer custom fields
+- Customer cards and IBANs
+- Inquiry APIs
+- IPG payment send, redirect URL, transaction, and verify helpers
+- Refunds
+- Settlements, queued settlements, and batch settlements
+- Avand/Cash-in account, statement, balance, label, code, and suspicious-payment helpers
+- Offline testing fakes with `Vandar::fake()`
 
 ## Installation
-
-Install the package with Composer:
 
 ```bash
 composer require zarbinco/laravel-vandar
@@ -18,114 +34,148 @@ Publish the configuration file:
 php artisan vendor:publish --tag=vandar-config
 ```
 
-## Basic Usage
+## Configuration
 
-```php
-use Zarbinco\LaravelVandar\Facades\Vandar;
+Common environment values:
 
-Vandar::name();
-Vandar::baseUrl('api');
+```env
+VANDAR_BUSINESS=fake-business
+VANDAR_ACCESS_TOKEN=fake-access-token
+VANDAR_REFRESH_TOKEN=fake-refresh-token
+VANDAR_TOKEN_STORE=cache
+VANDAR_IPG_API_KEY=fake-ipg-api-key
+VANDAR_IPG_CALLBACK_URL=https://example.com/payments/callback
+VANDAR_HTTP_VERIFY_SSL=true
+VANDAR_LOGGING_ENABLED=false
 ```
 
-## HTTP Foundation
+Supported token stores are `config`, `cache`, and `custom`. The cache store encrypts cached token payloads by default.
 
-Phase 2 adds the generic HTTP and token-management foundation that future resources use. Phase 3 adds business and customer resources while card, IBAN, inquiry, IPG, settlement, and direct debit resources remain future work.
+Refresh the configured access token:
 
-## Business resource
+```bash
+php artisan vandar:refresh-token
+```
+
+The refresh command does not print access tokens or refresh tokens.
+
+## Usage
 
 ```php
 use Zarbinco\LaravelVandar\Facades\Vandar;
+```
 
-$info = Vandar::business()->info();
-$users = Vandar::business()->users();
+### Business
+
+```php
 $balance = Vandar::business()->balance();
 $transactions = Vandar::business()->transactions(['page' => 1]);
 ```
 
-## Customer resource
+### Customers
 
 ```php
-use Zarbinco\LaravelVandar\Facades\Vandar;
-
-$customers = Vandar::customers()->list(['page' => 1]);
-
 $customer = Vandar::customers()->createIndividual([
-    'first_name' => 'Test',
+    'first_name' => 'Fake',
     'last_name' => 'User',
     'mobile' => 'fake-mobile',
     'individual_national_code' => 'fake-national-code',
 ]);
-
-$legal = Vandar::customers()->createLegal([
-    'legal_name' => 'Test Company',
-    'agent_name' => 'Test Agent',
-    'agent_mobile' => 'fake-agent-mobile',
-    'legal_national_code' => 'fake-legal-code',
-]);
-
-$found = Vandar::customers()->find('customer-id');
-$updated = Vandar::customers()->update('customer-id', ['first_name' => 'Updated']);
-$deleted = Vandar::customers()->delete('customer-id');
 ```
 
-The package does not validate or normalize Iranian identifiers in Phase 3. Vandar should validate customer fields, national codes, mobiles, and related values.
-
-## Customer custom fields
+### Cards And IBANs
 
 ```php
-$fields = Vandar::customers()->fields()->list();
-$field = Vandar::customers()->fields()->create(['name' => 'Test Field']);
-$updated = Vandar::customers()->fields()->update('field-id', ['name' => 'Updated Field']);
-$found = Vandar::customers()->fields()->find('field-id');
-$deleted = Vandar::customers()->fields()->delete('field-id');
-```
+$cards = Vandar::cards()->list('fake-customer-id');
 
-## Customer wallet/account
-
-```php
-$wallet = Vandar::customers()->walletBalance('customer-id');
-
-$deposit = Vandar::customers()->walletDeposit('customer-id', [
-    'amount' => 1000,
+$card = Vandar::cards()->create('fake-customer-id', [
+    'card' => 'fake-card',
     'track_id' => 'fake-track-id',
 ]);
 
-$withdraw = Vandar::customers()->walletWithdraw('customer-id', [
-    'amount' => 500,
+$ibans = Vandar::ibans()->list('fake-customer-id');
+
+$iban = Vandar::ibans()->create('fake-customer-id', [
+    'iban' => 'fake-iban',
     'track_id' => 'fake-track-id',
 ]);
 ```
 
-## Customer transactions
+### Inquiries
 
 ```php
-$transactions = Vandar::customers()->transactions('customer-id', ['page' => 1]);
+$shahkar = Vandar::inquiries()->shahkar([
+    'mobile' => 'fake-mobile',
+    'national_code' => 'fake-national-code',
+]);
+
+$ibanInquiry = Vandar::inquiries()->iban([
+    'iban' => 'fake-iban',
+    'track_id' => 'fake-track-id',
+]);
 ```
 
-Customer transactions follow the current Vandar docs and use `POST /v2/business/{business}/customers/{customer}/transactions`.
-
-The package does not persist customer data. Your Laravel application remains responsible for its own models, workflows, authorization, and storage.
-
-## Raw Requests
-
-Use raw requests only for advanced/manual usage while named resources are introduced in future phases.
+### IPG
 
 ```php
-use Zarbinco\LaravelVandar\Facades\Vandar;
+$payment = Vandar::ipg()->send([
+    'amount' => 100000,
+    'callback_url' => 'https://example.com/payments/callback',
+]);
 
-$response = Vandar::raw()->get('api', '/v2/ping', auth: false);
-
-if ($response->successful()) {
-    $data = $response->json();
-}
+$redirectUrl = Vandar::ipg()->redirectUrl('fake-payment-token');
+$verified = Vandar::ipg()->verify('fake-payment-token');
 ```
 
-## Safe Response Handling
-
-All HTTP calls return a `Zarbinco\LaravelVandar\DTO\VandarResponse` object.
+### Refunds
 
 ```php
-$response = Vandar::response(['message' => 'ok']);
+$refund = Vandar::refunds()->create('fake-transaction-id', [
+    'amount' => 100000,
+    'track_id' => 'fake-track-id',
+]);
+```
+
+### Settlements
+
+```php
+$settlement = Vandar::settlements()->create([
+    'iban' => 'fake-iban',
+    'amount' => 100000,
+    'track_id' => 'fake-track-id',
+]);
+
+$status = Vandar::settlements()->find('fake-track-id');
+
+$queued = Vandar::queuedSettlements()->create([
+    'iban' => 'fake-iban',
+    'amount' => 100000,
+]);
+
+$batch = Vandar::batchSettlements()->create([
+    'settlements' => [
+        ['iban' => 'fake-iban', 'amount' => 100000],
+    ],
+]);
+```
+
+### Avand/Cash-In
+
+```php
+$account = Vandar::avand()->account();
+$balance = Vandar::avand()->balance(['track_id' => 'fake-track-id']);
+$statement = Vandar::avand()->statement(['page' => 1]);
+$code = Vandar::cashIn()->code();
+```
+
+More examples are available in [docs/usage.md](docs/usage.md).
+
+## Response Handling
+
+Every HTTP resource returns `Zarbinco\LaravelVandar\DTO\VandarResponse`.
+
+```php
+$response = Vandar::business()->balance();
 
 $response->status();
 $response->json();
@@ -135,108 +185,84 @@ $response->errors();
 $response->trackId();
 $response->successful();
 $response->failed();
-```
-
-Call `throw()` when you want failed responses converted to package exceptions.
-
-```php
 $response->throw();
 ```
 
-## Token Stores
+`throw()` maps common failed statuses to package exceptions such as authentication, authorization, validation, rate-limit, server, and generic request exceptions.
 
-Phase 2 supports these token store drivers:
+## Safe Logging And Redaction
 
-- `config`: reads tokens from configuration and environment values. It is read-only at runtime.
-- `cache`: reads initial tokens from configuration, then stores refreshed tokens in Laravel cache.
-- `custom`: resolves your own implementation of `Zarbinco\LaravelVandar\Contracts\TokenStore`.
+Package logging is disabled by default. When enabled, request and response summaries are redacted before logging. The package redacts known sensitive body, response, header, query, and exact dynamic URL path values.
 
-Example local placeholder configuration:
+Application logs, exception reporters, APM traces, queues, and audit logs are still your responsibility. Avoid logging raw tokens, API keys, card data, IBANs, identity data, statement data, settlement data, and payment payloads outside this package.
 
-```env
-VANDAR_TOKEN_STORE=cache
-VANDAR_ACCESS_TOKEN=your-initial-access-token
-VANDAR_REFRESH_TOKEN=your-initial-refresh-token
+## Testing With Fakes
+
+Use `Vandar::fake()` to test application code without real HTTP calls.
+
+```php
+Vandar::fake([
+    'ipg.send' => [
+        'status' => 200,
+        'body' => [
+            'status' => 1,
+            'token' => 'fake-payment-token',
+        ],
+    ],
+]);
+
+$response = Vandar::ipg()->send([
+    'amount' => 100000,
+    'callback_url' => 'https://example.com/payments/callback',
+]);
+
+Vandar::assertSent('ipg.send');
+Vandar::assertNotSent('ipg.verify');
+Vandar::assertSentCount('ipg.send', 1);
 ```
 
-Use fake placeholder values in examples and tests. Never include real Vandar tokens in source control.
+URL-based fakes are also supported:
 
-## Refresh Token Command
-
-Refresh the configured Vandar access token:
-
-```bash
-php artisan vandar:refresh-token
+```php
+Vandar::fake([
+    'POST https://ipg.vandar.io/api/v4/send' => [
+        'body' => ['token' => 'fake-payment-token'],
+    ],
+]);
 ```
 
-The command never prints access tokens or refresh tokens.
-
-## Exceptions
-
-Failed response statuses are mapped by `VandarResponse::throw()`:
-
-- `401`: `VandarAuthenticationException`
-- `403`: `VandarAuthorizationException`
-- `422`: `VandarValidationException`
-- `429`: `VandarRateLimitException`
-- `500-599`: `VandarServerException`
-- Other failed statuses: `VandarRequestException`
-
-Token failures use `VandarTokenException` and related subclasses. Exception context is redacted before storage.
-
-## Configuration
-
-The published configuration file is available at `config/vandar.php`.
-
-It includes safe placeholders for:
-
-- Business identifier configuration.
-- Access and refresh token configuration.
-- Token storage preferences.
-- Base URLs for API, IPG, batch, and subscription services.
-- HTTP timeout, SSL verification, and retry options.
-- Logging options with sensitive data redaction enabled.
-
-Never commit real Vandar tokens or private customer data to source control.
-
-## Artisan
-
-Display package information without exposing sensitive values:
-
-```bash
-php artisan vandar:about
-```
-
-The command prints package metadata, configured base URL keys, token store driver, token presence, cache encryption status, and logging status. It never prints access tokens or refresh tokens.
-
-## Roadmap
-
-- Phase 1: Foundation
-- Phase 2: HTTP client + token system
-- Phase 3: Business + customers
-- Phase 4: Cards + IBANs
-- Phase 5: Inquiry APIs
-- Phase 6: IPG + refund
-- Phase 7: Settlement + Avand + batch
-- Phase 8: Public release polish
+See [docs/testing.md](docs/testing.md).
 
 ## Security
 
-Never commit real Vandar tokens.
+Never commit real Vandar credentials or private customer/payment data. Treat access tokens, refresh tokens, IPG API keys, card numbers, IBANs, national codes, mobile numbers, postal data, images, signatures, statements, settlements, cash-in records, payment tokens, and transaction IDs as sensitive.
 
-Do not log sensitive data. Use the package redaction utilities before storing or printing request, response, or diagnostic payloads that may include private values.
+Money-moving endpoints are not automatically retried by the package. Your application should enforce authorization, idempotency, audit logging, reconciliation, and duplicate-prevention.
 
-## Safe logging and redaction
+SSL verification defaults to true and should not be disabled in production.
 
-Package logging is disabled by default. When enabled, request and response payloads are redacted before logging, and URLs are sanitized so sensitive query values are not written to logs.
+Report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 
-Package commands never print access tokens or refresh tokens. Applications should still avoid logging sensitive business data outside this package.
+## Application Responsibility
 
-## Testing
+This package does not create routes, controllers, migrations, views, models, webhook handlers, callback handlers, scheduled jobs, or application workflows. It does not persist Vandar responses in package-owned tables.
 
-```bash
-composer test
-```
+Your Laravel application owns persistence, authorization, operational review, reconciliation, UI, and domain-specific workflows.
+
+## Roadmap
+
+Not yet implemented:
+
+- Direct debit
+- Ravand, card issuing, and banking resources
+- Optional encrypted database token store
+- Additional typed response DTOs if needed
+
+See [docs/roadmap.md](docs/roadmap.md).
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md). Contributions should include tests, pass Pint, use fake placeholder values, and keep the package app-agnostic.
 
 ## License
 

@@ -51,7 +51,7 @@ final class SensitiveUrlSanitizerTest extends TestCase
         $this->assertSame('/path?track_id=%5Bredacted%5D&amount=%5Bredacted%5D&settlement_id=%5Bredacted%5D&normal=yes', $url);
     }
 
-    public function test_phase_7a_query_keys_are_redacted(): void
+    public function test_avand_and_settlement_query_keys_are_redacted(): void
     {
         $url = SensitiveUrlSanitizer::sanitize('/path?tracking_code=fake-tracking-code&batchId=fake-batch-id&queued_id=fake-queued-id&suspicious_payment_id=fake-suspicious-id&payment_identifier=fake-payment-id&cash_in_code=fake-code&balance=100000&normal=yes');
 

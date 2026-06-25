@@ -21,6 +21,7 @@ use Zarbinco\LaravelVandar\Resources\QueuedSettlementResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Resources\RefundResource;
 use Zarbinco\LaravelVandar\Resources\SettlementResource;
+use Zarbinco\LaravelVandar\Testing\VandarFake;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
 final class LaravelVandar
@@ -101,6 +102,29 @@ final class LaravelVandar
     public function isLoggingEnabled(): bool
     {
         return (bool) $this->config('logging.enabled', false);
+    }
+
+    /**
+     * @param  array<string, mixed>  $responses
+     */
+    public function fake(array $responses = []): VandarFake
+    {
+        return (new VandarFake($this->configRepository, $responses))->install();
+    }
+
+    public function assertSent(string $method, ?callable $callback = null): void
+    {
+        (new VandarFake($this->configRepository))->assertSent($method, $callback);
+    }
+
+    public function assertNotSent(string $method, ?callable $callback = null): void
+    {
+        (new VandarFake($this->configRepository))->assertNotSent($method, $callback);
+    }
+
+    public function assertSentCount(string $method, int $count): void
+    {
+        (new VandarFake($this->configRepository))->assertSentCount($method, $count);
     }
 
     public function client(): VandarClient

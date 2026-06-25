@@ -45,7 +45,7 @@ final class ServiceProviderTest extends TestCase
         $this->assertSame('Laravel Vandar SDK', Vandar::name());
     }
 
-    public function test_it_registers_phase_two_services(): void
+    public function test_it_registers_http_and_token_services(): void
     {
         $this->assertInstanceOf(VandarClient::class, $this->app->make(VandarClient::class));
         $this->assertInstanceOf(TokenManager::class, $this->app->make(TokenManager::class));
@@ -53,7 +53,7 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(RawResource::class, $this->app->make(RawResource::class));
     }
 
-    public function test_it_registers_phase_three_services(): void
+    public function test_it_registers_business_and_customer_services(): void
     {
         $this->assertInstanceOf(BusinessResource::class, $this->app->make(BusinessResource::class));
         $this->assertInstanceOf(CustomerResource::class, $this->app->make(CustomerResource::class));
@@ -62,7 +62,7 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(CustomerResource::class, Vandar::customers());
     }
 
-    public function test_it_registers_phase_four_services(): void
+    public function test_it_registers_card_and_iban_services(): void
     {
         $this->assertInstanceOf(CardResource::class, $this->app->make(CardResource::class));
         $this->assertInstanceOf(IbanResource::class, $this->app->make(IbanResource::class));
@@ -72,13 +72,13 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(IbanResource::class, Vandar::customers()->ibans());
     }
 
-    public function test_it_registers_phase_five_services(): void
+    public function test_it_registers_inquiry_services(): void
     {
         $this->assertInstanceOf(InquiryResource::class, $this->app->make(InquiryResource::class));
         $this->assertInstanceOf(InquiryResource::class, Vandar::inquiries());
     }
 
-    public function test_it_registers_phase_six_services(): void
+    public function test_it_registers_ipg_and_refund_services(): void
     {
         $this->assertInstanceOf(IpgApiKeyResolver::class, $this->app->make(IpgApiKeyResolver::class));
         $this->assertInstanceOf(IpgResource::class, $this->app->make(IpgResource::class));
@@ -87,7 +87,7 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(RefundResource::class, Vandar::refunds());
     }
 
-    public function test_it_registers_phase_seven_services(): void
+    public function test_it_registers_settlement_and_avand_services(): void
     {
         $this->assertInstanceOf(SettlementResource::class, $this->app->make(SettlementResource::class));
         $this->assertInstanceOf(QueuedSettlementResource::class, $this->app->make(QueuedSettlementResource::class));

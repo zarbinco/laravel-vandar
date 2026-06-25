@@ -9,7 +9,7 @@ return [
         'access_token' => env('VANDAR_ACCESS_TOKEN'),
         'refresh_token' => env('VANDAR_REFRESH_TOKEN'),
 
-        // Supported in Phase 2: config, cache, custom.
+        // Supported token stores: config, cache, custom.
         'store' => env('VANDAR_TOKEN_STORE', 'cache'),
         'cache_key' => env('VANDAR_TOKEN_CACHE_KEY', 'vandar.tokens'),
 
@@ -46,7 +46,7 @@ return [
         'verify_ssl' => env('VANDAR_HTTP_VERIFY_SSL', true),
 
         // Retry must remain conservative.
-        // Never automatically retry unsafe money-moving POST endpoints in future phases.
+        // Never automatically retry unsafe money-moving POST endpoints.
         'retry' => [
             'enabled' => env('VANDAR_HTTP_RETRY', false),
             'times' => (int) env('VANDAR_HTTP_RETRY_TIMES', 1),

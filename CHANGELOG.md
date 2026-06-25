@@ -4,53 +4,23 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 ## Unreleased
 
-- Added Avand settlement-account balance, statement, realtime-statement, transaction-label, identifier cash-in, PIC transaction, and suspicious-payment helpers.
-- Hardened URL logging redaction to replace exact sensitive decoded path segments without broad substring replacement.
-- Added URL path redaction metadata for settlement, queued settlement, batch settlement, Avand, and existing refund dynamic path calls.
-- Expanded sensitive redaction keys for Avand labels, statements, balances, tracking codes, queued IDs, batch IDs, cash-in codes, payment identifiers, and suspicious-payment IDs.
-- Disabled automatic retry for Avand transaction-label and suspicious-payment write operations.
-- Added Phase 7A tests.
-- Added SettlementResource for normal settlement create/status/list/cancel/banks APIs.
-- Added QueuedSettlementResource.
-- Added BatchSettlementResource using the batch base URL.
-- Added AvandResource for cash-in account/deposit/balance APIs.
-- Disabled automatic retry for Phase 7 money-moving endpoints.
-- Hardened redaction keys for settlement, batch, and cash-in payloads/responses.
-- Added Phase 7 tests.
-- Added IpgResource for Vandar IPG send, redirect URL, transaction, and verify APIs.
-- Added RefundResource for IPG transaction refunds.
-- Added IPG api key resolver and exception.
-- Added callback helper methods.
-- Disabled automatic retry for Phase 6 money-moving endpoints.
-- Hardened redaction keys for IPG/refund payloads and responses.
-- Added IPG and refund tests.
-- Added InquiryResource for Vandar inquiry services.
-- Added named methods for KYC, Shahkar, NID, NID image, Fida, postal code, company information, company signature, national-code/IBAN, mobile/card, IBAN, card, and card-to-IBAN inquiries.
-- Hardened redaction keys for inquiry payloads and responses.
-- Added inquiry resource tests.
-- Added CardResource for customer card APIs.
-- Added IbanResource for customer IBAN APIs.
-- Added customer-scoped card/IBAN inquiry helpers.
-- Added customer-scoped card-to-IBAN helper.
-- Added tests for card and IBAN resources.
-- Hardened redaction keys for card/account data.
-- Added BusinessResource.
-- Added CustomerResource.
-- Added CustomerFieldResource.
-- Added BusinessResolver and VandarPath helpers.
-- Added tests for business/customer resources.
-- Hardened URL sanitization for package logging.
-- Hardened exception context redaction.
-- Added tests for sensitive URL, log, and exception redaction.
-- Added generic HTTP client foundation.
-- Added VandarResponse DTO.
-- Added token store abstraction.
-- Added config/cache token stores.
-- Added token manager and refresh-token command.
-- Added RawResource for advanced generic requests.
-- Added exception mapping and related tests.
-- Renamed package owner, Composer package name, and PHP namespace from mrezdev/Mrezdev to zarbinco/Zarbinco.
-- Added the Phase 1 Laravel package foundation.
-- Added package service provider, facade, root SDK object, configuration file, and about command.
-- Added recursive sensitive data redaction support.
-- Added offline PHPUnit and Orchestra Testbench coverage for package registration, configuration, command output, and redaction behavior.
+### Added
+
+- Added Laravel service provider, facade, publishable configuration, and package auto-discovery.
+- Added configurable HTTP client with safe response handling.
+- Added token refresh support with config, cache, and custom token stores.
+- Added business, customer, card, IBAN, inquiry, IPG, refund, settlement, queued settlement, batch settlement, and Avand/Cash-in resources.
+- Added safe response DTOs and exception mapping.
+- Added testing utilities for faking Vandar API responses.
+- Added release audit script and GitHub Actions workflow.
+
+### Changed
+
+- Improved package documentation, security guidance, and contribution workflow.
+- Improved URL and payload handling for package logs and exception context.
+
+### Security
+
+- Added recursive sensitive data redaction for tokens, API keys, identity data, card/IBAN data, settlement data, and payment identifiers.
+- Added URL query and sensitive path segment sanitization for package logs.
+- Disabled automatic retries for money-moving endpoints.
