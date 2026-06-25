@@ -45,6 +45,7 @@ jobs:
         run: composer update ${{ matrix.composer-options }} --prefer-dist --no-interaction --no-progress
 
       - name: Run Pint
+        if: ${{ matrix.dependencies != 'lowest' && matrix.dependencies != 'prefer-lowest' }}
         run: vendor/bin/pint --test
 
       - name: Run Tests
