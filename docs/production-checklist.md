@@ -15,6 +15,7 @@ Use this checklist when integrating the package into a production Laravel applic
 - Verify the callback token with `verifyCallback()` before marking anything as paid
 - Match invoice/order amount, factor number/order id, token, and transaction id
 - Update payment records idempotently
+- Handle duplicate callbacks idempotently
 - Update wallet and ledger records idempotently when your application uses wallet-related endpoints
 - Store Vandar transaction IDs, authorization IDs, withdrawal IDs, refund IDs, and track IDs safely
 - Reconcile payments, refunds, settlements, queued settlements, batch settlements, and direct debit withdrawals

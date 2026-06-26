@@ -15,7 +15,11 @@ final class FakeVandarResponseFactory
             $status = is_numeric($definition['status'] ?? null) ? (int) $definition['status'] : 200;
             $headers = is_array($definition['headers'] ?? null) ? $definition['headers'] : [];
 
-            return Http::response(is_array($body) ? $body : [], $status, $headers);
+            return Http::response(
+                is_array($body) || is_string($body) ? $body : [],
+                $status,
+                $headers,
+            );
         }
 
         return Http::response(is_array($definition) ? $definition : [], 200);

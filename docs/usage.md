@@ -191,6 +191,36 @@ $factorNumber = $result->factorNumber();
 
 Your application must call verify after the callback and must handle idempotency, amount matching, invoice/order matching, transaction/token comparison, persistence, and reconciliation.
 
+### Safe callback controller skeleton
+
+This skeleton keeps the SDK boundary visible: verify before marking anything paid. The SDK returns Vandar responses only; the DB transaction belongs to your application.
+
+```php
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Zarbinco\LaravelVandar\Facades\Vandar;
+
+public function callback(Request $request)
+{
+    $result = Vandar::ipg()->verifyCallback($request);
+
+    if (! $result->verified()) {
+        return response()->noContent();
+    }
+
+    DB::transaction(function () use ($result): void {
+        // Load your local payment by stored Vandar token with a row lock.
+        // Duplicate callbacks must be handled idempotently.
+        // Compare amount, factorNumber/order id, token, and transaction id.
+        // Update your own payment, invoice, order, or wallet records here.
+    });
+
+    return response()->noContent();
+}
+```
+
+Do not treat the skeleton as package behavior. The package does not persist records, deduplicate callbacks, or decide whether a local invoice/order/wallet update is valid.
+
 ## Settlements
 
 ```php
