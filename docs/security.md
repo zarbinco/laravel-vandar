@@ -24,4 +24,8 @@ IPG callback payloads and verify responses can include payment tokens, transacti
 
 Payment, refund, settlement, queued settlement, batch settlement, Avand deposit, transaction label writes, and suspicious-payment resolution calls should be protected with authorization, idempotency, audit logging, duplicate-prevention, and reconciliation.
 
-The package does not automatically retry known unsafe money-moving requests. SSL verification defaults to true and should not be disabled in production.
+The package does not automatically retry known unsafe money-moving requests. Rate-limit handling can retry safe methods on `429`, but money-moving retries require explicit opt-in and are only safe when the application provides idempotency guarantees.
+
+Token refresh is protected with cache locks when available to reduce duplicate refresh calls under concurrent traffic. Token refresh exceptions and context must not include raw access tokens or refresh tokens.
+
+SSL verification defaults to true and should not be disabled in production.

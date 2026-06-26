@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zarbinco\LaravelVandar\Http;
 
+use Closure;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Client\ConnectionException;
@@ -20,11 +21,24 @@ use Zarbinco\LaravelVandar\Token\TokenManager;
 
 final class PendingVandarRequest
 {
+    /**
+     * @var Closure(int): void|null
+     */
+    private static ?Closure $sleepUsing = null;
+
     public function __construct(
         private readonly HttpFactory $http,
         private readonly ConfigRepository $config,
         private readonly Container $app,
     ) {}
+
+    /**
+     * @internal
+     */
+    public static function sleepUsing(?callable $sleeper): void
+    {
+        self::$sleepUsing = $sleeper === null ? null : Closure::fromCallable($sleeper);
+    }
 
     /**
      * @param  array<string, mixed>  $options
@@ -37,6 +51,32 @@ final class PendingVandarRequest
         $extraSensitiveKeys = $this->extraSensitiveKeysFromOptions($options);
         $options = $this->withoutInternalOptions($options);
         $safeUrl = SensitiveUrlSanitizer::sanitize($url, sensitivePathSegments: $sensitivePathSegments);
+        $vandarResponse = $this->sendOnce($method, $url, $safeUrl, $options, $auth, $allowRetry, $extraSensitiveKeys);
+        $this->logSummary($method, $safeUrl, $options, $vandarResponse, $extraSensitiveKeys);
+
+        if ($this->shouldRetryRateLimited($method, $allowRetry, $vandarResponse)) {
+            $this->sleepMilliseconds($this->rateLimitRetryDelayMilliseconds($vandarResponse));
+
+            $vandarResponse = $this->sendOnce($method, $url, $safeUrl, $options, $auth, $allowRetry, $extraSensitiveKeys);
+            $this->logSummary($method, $safeUrl, $options, $vandarResponse, $extraSensitiveKeys);
+        }
+
+        return $vandarResponse;
+    }
+
+    /**
+     * @param  array<string, mixed>  $options
+     * @param  array<int, string>  $extraSensitiveKeys
+     */
+    private function sendOnce(
+        string $method,
+        string $url,
+        string $safeUrl,
+        array $options,
+        bool $auth,
+        bool $allowRetry,
+        array $extraSensitiveKeys,
+    ): VandarResponse {
         $request = $this->http
             ->acceptJson()
             ->asJson()
@@ -44,7 +84,7 @@ final class PendingVandarRequest
             ->connectTimeout($this->intConfig('vandar.http.connect_timeout', 10))
             ->withOptions(['verify' => (bool) $this->config->get('vandar.http.verify_ssl', true)]);
 
-        if ($allowRetry && $method === 'GET' && (bool) $this->config->get('vandar.http.retry.enabled', false)) {
+        if ($allowRetry && $method === 'GET' && $this->boolConfig('vandar.http.retry.enabled', false)) {
             $request = $request->retry(
                 $this->intConfig('vandar.http.retry.times', 1),
                 $this->intConfig('vandar.http.retry.sleep_ms', 500),
@@ -62,7 +102,7 @@ final class PendingVandarRequest
         }
 
         try {
-            $response = $request->send($method, $url, $options);
+            return $this->toVandarResponse($request->send($method, $url, $options));
         } catch (ConnectionException $exception) {
             throw new VandarRequestException(
                 message: 'Unable to connect to Vandar.',
@@ -84,11 +124,6 @@ final class PendingVandarRequest
                 previous: $exception,
             );
         }
-
-        $vandarResponse = $this->toVandarResponse($response);
-        $this->logSummary($method, $safeUrl, $options, $vandarResponse, $extraSensitiveKeys);
-
-        return $vandarResponse;
     }
 
     private function baseUrl(string $base): string
@@ -242,5 +277,76 @@ final class PendingVandarRequest
         $value = $this->config->get($key, $default);
 
         return is_numeric($value) ? (int) $value : $default;
+    }
+
+    private function boolConfig(string $key, bool $default): bool
+    {
+        $value = $this->config->get($key, $default);
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $parsed = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+            return is_bool($parsed) ? $parsed : $default;
+        }
+
+        if (is_numeric($value)) {
+            return (bool) (int) $value;
+        }
+
+        return $default;
+    }
+
+    private function shouldRetryRateLimited(string $method, bool $allowRetry, VandarResponse $response): bool
+    {
+        if (! $response->rateLimited() || ! $this->boolConfig('vandar.rate_limit.aware', true)) {
+            return false;
+        }
+
+        if ($this->isSafeMethod($method)) {
+            return $allowRetry && $this->boolConfig('vandar.rate_limit.retry_safe_methods', true);
+        }
+
+        return $this->boolConfig('vandar.rate_limit.retry_money_moving_requests', false);
+    }
+
+    private function isSafeMethod(string $method): bool
+    {
+        return in_array($method, ['GET', 'HEAD', 'OPTIONS'], true);
+    }
+
+    private function rateLimitRetryDelayMilliseconds(VandarResponse $response): int
+    {
+        if (! $this->boolConfig('vandar.rate_limit.respect_retry_after', true)) {
+            return 0;
+        }
+
+        $retryAfter = $response->retryAfter();
+
+        if ($retryAfter === null) {
+            return 0;
+        }
+
+        $maxRetryAfter = max(0, $this->intConfig('vandar.rate_limit.max_retry_after_seconds', 3));
+
+        return min($retryAfter, $maxRetryAfter) * 1000;
+    }
+
+    private function sleepMilliseconds(int $milliseconds): void
+    {
+        if ($milliseconds <= 0) {
+            return;
+        }
+
+        if (self::$sleepUsing instanceof Closure) {
+            (self::$sleepUsing)($milliseconds);
+
+            return;
+        }
+
+        usleep($milliseconds * 1000);
     }
 }

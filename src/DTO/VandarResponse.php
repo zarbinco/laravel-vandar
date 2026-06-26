@@ -290,6 +290,38 @@ final class VandarResponse
         return $this->status === 429;
     }
 
+    public function retryAfter(): ?int
+    {
+        $value = $this->firstHeaderValue('Retry-After');
+
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        if (preg_match('/^\d+$/', $value) === 1) {
+            return (int) $value;
+        }
+
+        $timestamp = strtotime($value);
+
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return max(0, $timestamp - time());
+    }
+
+    public function rateLimited(): bool
+    {
+        return $this->tooManyRequests();
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -350,6 +382,23 @@ final class VandarResponse
     private function keyList(array|string $keys): array
     {
         return is_array($keys) ? array_values($keys) : [$keys];
+    }
+
+    private function firstHeaderValue(string $name): ?string
+    {
+        $value = $this->header($name);
+
+        if (is_array($value)) {
+            foreach ($value as $headerValue) {
+                if (is_scalar($headerValue) && trim((string) $headerValue) !== '') {
+                    return (string) $headerValue;
+                }
+            }
+
+            return null;
+        }
+
+        return is_scalar($value) && trim((string) $value) !== '' ? (string) $value : null;
     }
 
     private function truncateBody(string $body): string

@@ -193,6 +193,39 @@ final class VandarResponseTest extends TestCase
         $this->assertFalse($response->jsonParseFailed());
     }
 
+    public function test_rate_limit_helpers_read_retry_after_headers(): void
+    {
+        $response = new VandarResponse(429, headers: [
+            'Retry-After' => ['2'],
+        ]);
+
+        $this->assertTrue($response->tooManyRequests());
+        $this->assertTrue($response->rateLimited());
+        $this->assertSame(2, $response->retryAfter());
+    }
+
+    public function test_retry_after_parses_http_date_header(): void
+    {
+        $response = new VandarResponse(429, headers: [
+            'retry-after' => [gmdate('D, d M Y H:i:s \G\M\T', time() + 120)],
+        ]);
+
+        $retryAfter = $response->retryAfter();
+
+        $this->assertIsInt($retryAfter);
+        $this->assertGreaterThanOrEqual(0, $retryAfter);
+        $this->assertLessThanOrEqual(120, $retryAfter);
+    }
+
+    public function test_invalid_retry_after_returns_null(): void
+    {
+        $response = new VandarResponse(429, headers: [
+            'Retry-After' => ['not-a-date'],
+        ]);
+
+        $this->assertNull($response->retryAfter());
+    }
+
     /**
      * @param  class-string<\Throwable>  $exception
      */

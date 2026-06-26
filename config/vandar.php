@@ -23,6 +23,9 @@ return [
         // Use Laravel cache lock when available to avoid concurrent refresh.
         'lock_key' => env('VANDAR_TOKEN_LOCK_KEY', 'vandar.tokens.refresh.lock'),
         'lock_seconds' => (int) env('VANDAR_TOKEN_LOCK_SECONDS', 30),
+        'lock_wait_seconds' => (int) env('VANDAR_TOKEN_LOCK_WAIT_SECONDS', 5),
+        'refresh_attempts' => (int) env('VANDAR_TOKEN_REFRESH_ATTEMPTS', 3),
+        'refresh_retry_sleep_ms' => (int) env('VANDAR_TOKEN_REFRESH_RETRY_SLEEP_MS', 250),
 
         // Cache driver stores encrypted payload by default.
         'encrypt_cache' => env('VANDAR_TOKEN_ENCRYPT_CACHE', true),
@@ -52,6 +55,14 @@ return [
             'times' => (int) env('VANDAR_HTTP_RETRY_TIMES', 1),
             'sleep_ms' => (int) env('VANDAR_HTTP_RETRY_SLEEP_MS', 500),
         ],
+    ],
+
+    'rate_limit' => [
+        'aware' => env('VANDAR_RATE_LIMIT_AWARE', true),
+        'respect_retry_after' => env('VANDAR_RESPECT_RETRY_AFTER', true),
+        'max_retry_after_seconds' => (int) env('VANDAR_MAX_RETRY_AFTER_SECONDS', 3),
+        'retry_safe_methods' => env('VANDAR_RETRY_SAFE_METHODS', true),
+        'retry_money_moving_requests' => env('VANDAR_RETRY_MONEY_MOVING_REQUESTS', false),
     ],
 
     'logging' => [

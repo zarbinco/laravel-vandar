@@ -17,16 +17,17 @@ class VandarTokenRefreshException extends VandarTokenException
         int $status = 0,
         array $response = [],
         ?Throwable $previous = null,
+        array $context = [],
     ) {
         parent::__construct(
             message: self::safeMessage($message),
             code: $status,
             previous: $previous,
-            context: [
+            context: array_merge([
                 'status' => $status,
                 'message' => 'Unable to refresh Vandar token.',
                 'response' => SensitiveDataRedactor::redact($response),
-            ],
+            ], SensitiveDataRedactor::redact($context)),
         );
     }
 

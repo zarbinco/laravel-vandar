@@ -53,13 +53,23 @@ VANDAR_BUSINESS=fake-business
 VANDAR_ACCESS_TOKEN=fake-access-token
 VANDAR_REFRESH_TOKEN=fake-refresh-token
 VANDAR_TOKEN_STORE=cache
+VANDAR_TOKEN_LOCK_WAIT_SECONDS=5
+VANDAR_TOKEN_REFRESH_ATTEMPTS=3
+VANDAR_TOKEN_REFRESH_RETRY_SLEEP_MS=250
 VANDAR_IPG_API_KEY=fake-ipg-api-key
 VANDAR_IPG_CALLBACK_URL=https://example.com/payments/callback
+VANDAR_RATE_LIMIT_AWARE=true
+VANDAR_RESPECT_RETRY_AFTER=true
+VANDAR_MAX_RETRY_AFTER_SECONDS=3
+VANDAR_RETRY_SAFE_METHODS=true
+VANDAR_RETRY_MONEY_MOVING_REQUESTS=false
 VANDAR_HTTP_VERIFY_SSL=true
 VANDAR_LOGGING_ENABLED=false
 ```
 
 Supported token stores are `config`, `cache`, and `custom`. The cache store encrypts cached token payloads by default.
+
+Token refresh is lock-protected to reduce duplicate refresh calls when many requests hit near token expiry. The lock wait, refresh attempts, and retry sleep values can be tuned with the `VANDAR_TOKEN_*` environment values above.
 
 Refresh the configured access token:
 
@@ -248,6 +258,20 @@ if ($response->jsonParseFailed()) {
 ```
 
 `throw()` maps common failed statuses to package exceptions such as authentication, authorization, validation, rate-limit, server, and generic request exceptions.
+
+## Rate Limits
+
+Vandar applies request limits. The SDK preserves `429` responses and `Retry-After` headers, and can retry safe methods such as `GET`, `HEAD`, and `OPTIONS` once after a capped delay. Money-moving requests are not retried by default.
+
+```env
+VANDAR_RATE_LIMIT_AWARE=true
+VANDAR_RESPECT_RETRY_AFTER=true
+VANDAR_MAX_RETRY_AFTER_SECONDS=3
+VANDAR_RETRY_SAFE_METHODS=true
+VANDAR_RETRY_MONEY_MOVING_REQUESTS=false
+```
+
+Applications should still use queue throttling, backoff, and business-level idempotency for high-volume operations. This package does not guarantee that a retried financial operation is safe unless your application provides idempotency guarantees.
 
 ## Safe Logging And Redaction
 

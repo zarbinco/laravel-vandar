@@ -10,6 +10,21 @@ The package is available on Packagist:
 composer require zarbinco/laravel-vandar
 ```
 
+Useful token refresh and rate-limit settings:
+
+```env
+VANDAR_TOKEN_LOCK_WAIT_SECONDS=5
+VANDAR_TOKEN_REFRESH_ATTEMPTS=3
+VANDAR_TOKEN_REFRESH_RETRY_SLEEP_MS=250
+VANDAR_RATE_LIMIT_AWARE=true
+VANDAR_RESPECT_RETRY_AFTER=true
+VANDAR_MAX_RETRY_AFTER_SECONDS=3
+VANDAR_RETRY_SAFE_METHODS=true
+VANDAR_RETRY_MONEY_MOVING_REQUESTS=false
+```
+
+Token refresh is lock-protected to reduce duplicate refresh calls when many requests hit near token expiry. Vandar also applies request limits; safe methods may be retried once on `429`, while money-moving requests are not retried by default.
+
 ## Business
 
 ```php
@@ -154,3 +169,13 @@ if ($response->jsonParseFailed()) {
     ]);
 }
 ```
+
+Use response helpers to inspect rate limits:
+
+```php
+if ($response->rateLimited()) {
+    $retryAfter = $response->retryAfter();
+}
+```
+
+Applications should implement queue throttling and idempotency for high-volume or financial workflows. A retried financial operation is only safe when your application provides the idempotency guarantees.
