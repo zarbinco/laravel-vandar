@@ -183,6 +183,34 @@ final class VandarResponseTest extends TestCase
         $this->assertStringContainsString('[REDACTED]', $encoded);
     }
 
+    public function test_json_and_to_array_preserve_parsed_values_that_apps_must_redact_before_logging(): void
+    {
+        $response = new VandarResponse(
+            status: 200,
+            json: [
+                'token' => 'fake-token',
+                'factorNumber' => 'fake-factor-number',
+                'transaction_id' => 'fake-transaction-id',
+                'status' => 'ok',
+            ],
+            headers: [
+                'Authorization' => ['Bearer fake-authorization-token'],
+            ],
+            body: '{"token":"fake-token","factorNumber":"fake-factor-number","status":"ok"}',
+        );
+
+        $array = $response->toArray();
+
+        $this->assertSame('fake-token', $response->json('token'));
+        $this->assertSame('fake-factor-number', $array['json']['factorNumber']);
+        $this->assertSame('fake-transaction-id', $array['json']['transaction_id']);
+        $this->assertSame(['Bearer fake-authorization-token'], $array['headers']['Authorization']);
+        $this->assertSame('ok', $array['json']['status']);
+        $this->assertStringNotContainsString('fake-token', (string) $array['redacted_body']);
+        $this->assertStringNotContainsString('fake-factor-number', (string) $array['redacted_body']);
+        $this->assertStringContainsString('ok', (string) $array['redacted_body']);
+    }
+
     public function test_new_constructor_parameters_are_optional(): void
     {
         $response = new VandarResponse(200, ['ok' => true], ['X-Test' => ['yes']]);

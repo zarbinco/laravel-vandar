@@ -92,7 +92,7 @@ final class PendingVandarRequestResponseBodyTest extends TestCase
 
     public function test_malformed_json_response_can_be_inspected_safely(): void
     {
-        $body = '{"token":"fake-secret-token",';
+        $body = '{"token":"fake-secret-token","factorNumber":"fake-factor-number","settlement_id":"fake-settlement-id","customer_id":"fake-customer-id",';
         Http::fake([
             'https://api.vandar.io/*' => Http::response($body, 500, [
                 'Content-Type' => 'application/json',
@@ -105,13 +105,16 @@ final class PendingVandarRequestResponseBodyTest extends TestCase
         $this->assertTrue($response->jsonParseFailed());
         $this->assertStringContainsString('[REDACTED]', (string) $response->redactedBody());
         $this->assertStringNotContainsString('fake-secret-token', (string) $response->redactedBody());
+        $this->assertStringNotContainsString('fake-factor-number', (string) $response->redactedBody());
+        $this->assertStringNotContainsString('fake-settlement-id', (string) $response->redactedBody());
+        $this->assertStringNotContainsString('fake-customer-id', (string) $response->redactedBody());
     }
 
     public function test_failed_response_body_values_are_redacted_in_exception_context(): void
     {
         Http::fake([
             'https://api.vandar.io/*' => Http::response(
-                '{"message":"Failed","token":"fake-secret-token","card_number":"fake-card-number","data":{"iban":"fake-iban"}}',
+                '{"message":"Failed","token":"fake-secret-token","card_number":"fake-card-number","factorNumber":"fake-factor-number","data":{"iban":"fake-iban","customer_id":"fake-customer-id"}}',
                 422,
                 ['Content-Type' => 'application/json'],
             ),
@@ -127,6 +130,8 @@ final class PendingVandarRequestResponseBodyTest extends TestCase
             $this->assertIsString($encodedContext);
             $this->assertStringNotContainsString('fake-secret-token', $encodedContext);
             $this->assertStringNotContainsString('fake-card-number', $encodedContext);
+            $this->assertStringNotContainsString('fake-factor-number', $encodedContext);
+            $this->assertStringNotContainsString('fake-customer-id', $encodedContext);
             $this->assertStringNotContainsString('fake-iban', $encodedContext);
             $this->assertStringContainsString('redacted_body', $encodedContext);
             $this->assertStringContainsString('json_parse_failed', $encodedContext);

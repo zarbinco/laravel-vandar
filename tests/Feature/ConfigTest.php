@@ -22,6 +22,14 @@ final class ConfigTest extends TestCase
         $this->assertSame('https://api.vandar.io', $vandar->baseUrl('api'));
     }
 
+    public function test_package_logging_is_disabled_by_default(): void
+    {
+        $vandar = $this->app->make(LaravelVandar::class);
+
+        $this->assertFalse($vandar->isLoggingEnabled());
+        $this->assertFalse(config('vandar.logging.enabled'));
+    }
+
     public function test_unknown_base_url_key_throws_exception(): void
     {
         $this->expectException(VandarException::class);

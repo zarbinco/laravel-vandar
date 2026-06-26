@@ -72,6 +72,13 @@ final class SensitiveUrlSanitizerTest extends TestCase
         $this->assertSame('/path?authorizationId=%5Bredacted%5D&withdrawal_id=%5Bredacted%5D&refundId=%5Bredacted%5D&mandate_id=%5Bredacted%5D&subscriptionId=%5Bredacted%5D&bankAccount=%5Bredacted%5D&accountNumber=%5Bredacted%5D&trackId=%5Bredacted%5D&normal=yes', $url);
     }
 
+    public function test_payment_banking_and_customer_query_keys_are_redacted(): void
+    {
+        $url = SensitiveUrlSanitizer::sanitize('/path?factorNumber=fake-factor-number&transactionId=fake-transaction-id&settlementId=fake-settlement-id&customer_id=fake-customer-id&customerIdentifier=fake-customer-identifier&sheba=fake-sheba&filters[mobile]=fake-mobile&page=1');
+
+        $this->assertSame('/path?factorNumber=%5Bredacted%5D&transactionId=%5Bredacted%5D&settlementId=%5Bredacted%5D&customer_id=%5Bredacted%5D&customerIdentifier=%5Bredacted%5D&sheba=%5Bredacted%5D&filters%5Bmobile%5D=%5Bredacted%5D&page=1', $url);
+    }
+
     public function test_sensitive_path_segments_are_redacted_exactly(): void
     {
         $url = SensitiveUrlSanitizer::sanitize(

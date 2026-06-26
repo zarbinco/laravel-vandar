@@ -41,6 +41,71 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['meta']['customer']['mobile']);
     }
 
+    public function test_it_redacts_payment_banking_and_customer_identifiers(): void
+    {
+        $payload = [
+            'access_token' => 'fake-access-token',
+            'refresh_token' => 'fake-refresh-token',
+            'token' => 'fake-token',
+            'api_key' => 'fake-api-key',
+            'headers' => [
+                'Authorization' => 'Bearer fake-authorization-token',
+            ],
+            'card_number' => 'fake-card-number',
+            'iban' => 'fake-iban',
+            'sheba' => 'fake-sheba',
+            'mobile' => 'fake-mobile',
+            'national_code' => 'fake-national-code',
+            'transaction_id' => 'fake-transaction-id',
+            'transId' => 'fake-trans-id',
+            'factorNumber' => 'fake-factor-number',
+            'factor_number' => 'fake-factor-number',
+            'authorization_id' => 'fake-authorization-id',
+            'withdrawal_id' => 'fake-withdrawal-id',
+            'settlement_id' => 'fake-settlement-id',
+            'settlementId' => 'fake-settlement-id',
+            'customer_id' => 'fake-customer-id',
+            'customerId' => 'fake-customer-id',
+            'nested' => [
+                'customer_identifier' => 'fake-customer-identifier',
+                'customerCode' => 'fake-customer-code',
+                'status' => 'diagnostic',
+            ],
+            'status' => 'failed',
+            'message' => 'Validation failed',
+            'page' => 1,
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $encoded = json_encode($redacted);
+
+        $this->assertIsString($encoded);
+        $this->assertStringNotContainsString('fake-access-token', $encoded);
+        $this->assertStringNotContainsString('fake-refresh-token', $encoded);
+        $this->assertStringNotContainsString('fake-token', $encoded);
+        $this->assertStringNotContainsString('fake-api-key', $encoded);
+        $this->assertStringNotContainsString('fake-authorization-token', $encoded);
+        $this->assertStringNotContainsString('fake-card-number', $encoded);
+        $this->assertStringNotContainsString('fake-iban', $encoded);
+        $this->assertStringNotContainsString('fake-sheba', $encoded);
+        $this->assertStringNotContainsString('fake-mobile', $encoded);
+        $this->assertStringNotContainsString('fake-national-code', $encoded);
+        $this->assertStringNotContainsString('fake-transaction-id', $encoded);
+        $this->assertStringNotContainsString('fake-trans-id', $encoded);
+        $this->assertStringNotContainsString('fake-factor-number', $encoded);
+        $this->assertStringNotContainsString('fake-authorization-id', $encoded);
+        $this->assertStringNotContainsString('fake-withdrawal-id', $encoded);
+        $this->assertStringNotContainsString('fake-settlement-id', $encoded);
+        $this->assertStringNotContainsString('fake-customer-id', $encoded);
+        $this->assertStringNotContainsString('fake-customer-identifier', $encoded);
+        $this->assertStringNotContainsString('fake-customer-code', $encoded);
+        $this->assertSame('failed', $redacted['status']);
+        $this->assertSame('Validation failed', $redacted['message']);
+        $this->assertSame(1, $redacted['page']);
+        $this->assertSame('diagnostic', $redacted['nested']['status']);
+    }
+
     public function test_it_preserves_non_sensitive_values(): void
     {
         $payload = [
@@ -318,6 +383,36 @@ final class SensitiveDataRedactorTest extends TestCase
             "token=[REDACTED]&iban=[REDACTED]\nAuthorization:[REDACTED]\nphone=[REDACTED]",
             $redacted,
         );
+    }
+
+    public function test_it_redacts_sensitive_malformed_json_body_values(): void
+    {
+        $body = implode("\n", [
+            '{"access_token":"fake-access-token","refresh_token":"fake-refresh-token","factorNumber":"fake-factor-number","transaction_id":"fake-transaction-id","transId":"fake-trans-id",',
+            '"settlement_id":"fake-settlement-id","customer_id":"fake-customer-id","authorization_id":"fake-authorization-id","withdrawal_id":"fake-withdrawal-id","status":"diagnostic",',
+            'Authorization: Bearer fake-authorization-header',
+            'token=fake-token&api_key=fake-api-key&sheba=fake-sheba&mobile=fake-mobile&national_code=fake-national-code',
+        ]);
+
+        $redacted = SensitiveDataRedactor::redactText($body);
+
+        $this->assertStringContainsString('diagnostic', $redacted);
+        $this->assertStringContainsString('[REDACTED]', $redacted);
+        $this->assertStringNotContainsString('fake-access-token', $redacted);
+        $this->assertStringNotContainsString('fake-refresh-token', $redacted);
+        $this->assertStringNotContainsString('fake-factor-number', $redacted);
+        $this->assertStringNotContainsString('fake-transaction-id', $redacted);
+        $this->assertStringNotContainsString('fake-trans-id', $redacted);
+        $this->assertStringNotContainsString('fake-settlement-id', $redacted);
+        $this->assertStringNotContainsString('fake-customer-id', $redacted);
+        $this->assertStringNotContainsString('fake-authorization-id', $redacted);
+        $this->assertStringNotContainsString('fake-withdrawal-id', $redacted);
+        $this->assertStringNotContainsString('fake-authorization-header', $redacted);
+        $this->assertStringNotContainsString('fake-token', $redacted);
+        $this->assertStringNotContainsString('fake-api-key', $redacted);
+        $this->assertStringNotContainsString('fake-sheba', $redacted);
+        $this->assertStringNotContainsString('fake-mobile', $redacted);
+        $this->assertStringNotContainsString('fake-national-code', $redacted);
     }
 
     public function test_body_text_redaction_is_deterministic(): void

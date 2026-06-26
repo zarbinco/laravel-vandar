@@ -8,8 +8,10 @@ Use this checklist when integrating the package into a production Laravel applic
 - Keep package logging disabled unless you have reviewed redaction behavior
 - Define an application logging policy for Vandar payloads, identifiers, and exceptions
 - Use `redactedBody()` instead of raw response bodies in diagnostics
+- Do not log `$response->body()`, `$response->json()`, full exception objects, or raw banking payloads directly
 - Do not log `$response->toArray()` directly unless parsed JSON and headers have been redacted
 - Rely on package-redacted exception context instead of raw response arrays
+- Review even redacted context against your application's retention and security policy
 - Never trust an IPG callback alone
 - Verify the callback token with `verifyCallback()` before marking anything as paid
 - Match invoice/order amount, factor number/order id, token, and transaction id

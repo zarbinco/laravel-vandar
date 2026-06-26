@@ -49,11 +49,24 @@ Unsafe unless manually redacted:
 
 `toArray()` avoids raw body leakage by using `redacted_body`, but parsed JSON and headers may still contain sensitive values. Redact parsed JSON and headers before logging direct response arrays.
 
+Do not dump whole exception objects, traces, raw response arrays, or full banking payloads into production logs. When logging package exceptions, prefer selected fields and review even redacted context against your own retention policy.
+
+```php
+try {
+    // Call Vandar through the SDK.
+} catch (VandarRequestException $exception) {
+    logger()->warning('Vandar request failed', [
+        'status' => $exception->status(),
+        'context' => $exception->context(),
+    ]);
+}
+```
+
 ## Redacted package logging
 
 Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, and dynamic path values before writing request summaries.
 
-This redaction is a defensive helper. Application logs, audit trails, exception reporters, queue payloads, APM traces, support exports, and database records still need their own review.
+This redaction is a defensive helper. Application logs, audit trails, exception reporters, queue payloads, APM traces, support exports, and database records still need their own review. Debug logging should never include raw tokens, authorization headers, full banking payloads, or raw Vandar responses.
 
 ## IPG callbacks
 

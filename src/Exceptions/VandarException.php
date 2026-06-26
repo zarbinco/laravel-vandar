@@ -95,6 +95,6 @@ class VandarException extends RuntimeException
             return false;
         }
 
-        return preg_match('/(access[_-]?token|refresh[_-]?token|refreshtoken|authorization|bearer|api[_-]?key|card[_-]?number|cardnumber|valid[_-]?card[_-]?number|iban|account|national[_-]?code|fida|birth[_-]?date|birthday|postal[_-]?code|mobile|phone|cid|refnumber|trackingcode|track[_-]?id|settlement[_-]?(id|track)|transaction[_-]?id|transid|batch[_-]?id|transfer[_-]?id|deposit[_-]?id|reference|payment[_-]?token|callback[_-]?token|amount|wage|fee|signature|image)/i', $value) === 1;
+        return preg_match('/(access[_-]?token|refresh[_-]?token|refreshtoken|authorization|bearer|api[_-]?key|card[_-]?number|cardnumber|valid[_-]?card[_-]?number|iban|sheba|account|national[_-]?code|fida|birth[_-]?date|birthday|postal[_-]?code|mobile|phone|cid|customer[_-]?(id|identifier|code)|factor[_-]?(number|no)|refnumber|trackingcode|track[_-]?id|settlement[_-]?(id|track)|transaction[_-]?id|transid|authorization[_-]?id|withdrawal[_-]?id|batch[_-]?id|transfer[_-]?id|deposit[_-]?id|reference|payment[_-]?token|callback[_-]?token|amount|wage|fee|signature|image)/i', $value) === 1;
     }
 }

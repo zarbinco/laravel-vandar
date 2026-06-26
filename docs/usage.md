@@ -200,11 +200,16 @@ This skeleton keeps the SDK boundary visible: verify before marking anything pai
 ```php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Zarbinco\LaravelVandar\Exceptions\VandarIpgCallbackException;
 use Zarbinco\LaravelVandar\Facades\Vandar;
 
 public function callback(Request $request)
 {
-    $result = Vandar::ipg()->verifyCallback($request);
+    try {
+        $result = Vandar::ipg()->verifyCallback($request);
+    } catch (VandarIpgCallbackException) {
+        return response()->noContent();
+    }
 
     if (! $result->verified()) {
         return response()->noContent();
@@ -214,6 +219,7 @@ public function callback(Request $request)
         // Load your local payment by stored Vandar token with a row lock.
         // Duplicate callbacks must be handled idempotently.
         // Compare amount, factorNumber/order id, token, and transaction id.
+        // Normalize numeric strings before comparing amounts.
         // Update your own payment, invoice, order, or wallet records here.
     });
 
@@ -294,7 +300,7 @@ All resource calls return `Zarbinco\LaravelVandar\DTO\VandarResponse`.
 
 `json()` returns the parsed JSON array when available. `body()` keeps the raw response body for debugging, and `redactedBody()` returns a safer text body for logs. Use `jsonParseFailed()` to detect malformed JSON or unexpected upstream response bodies. Never log raw response bodies in production.
 
-Do not log `$response->toArray()` directly in production unless parsed JSON and headers have been redacted. `toArray()` includes `redacted_body` instead of raw body, but it preserves parsed JSON and headers for compatibility. Package exception context is redacted automatically.
+Do not log `$response->body()`, `$response->json()`, or `$response->toArray()` directly in production unless parsed JSON and headers have been redacted. `toArray()` includes `redacted_body` instead of raw body, but it preserves parsed JSON and headers for compatibility. Package exception context is redacted automatically.
 
 ```php
 $response = Vandar::ipg()->verify($token);
