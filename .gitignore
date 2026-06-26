@@ -1,6 +1,7 @@
 /vendor/
 /node_modules/
 /coverage/
+/build/
 /.phpunit.cache/
 /.phpunit.result.cache
 /.idea/

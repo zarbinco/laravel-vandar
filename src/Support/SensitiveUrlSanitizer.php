@@ -88,6 +88,10 @@ final class SensitiveUrlSanitizer
         'refreshtoken',
     ];
 
+    /**
+     * @param  array<int, mixed>  $extraSensitiveKeys
+     * @param  array<int, mixed>  $sensitivePathSegments
+     */
     public static function sanitize(string $url, array $extraSensitiveKeys = [], array $sensitivePathSegments = []): string
     {
         $parts = parse_url($url);
@@ -158,6 +162,9 @@ final class SensitiveUrlSanitizer
         return $url;
     }
 
+    /**
+     * @param  array<int, mixed>  $extraSensitiveKeys
+     */
     private static function sanitizeQuery(?string $query, array $extraSensitiveKeys): string
     {
         if ($query === null || $query === '') {
@@ -165,10 +172,6 @@ final class SensitiveUrlSanitizer
         }
 
         parse_str($query, $parameters);
-
-        if (! is_array($parameters)) {
-            return '';
-        }
 
         $sensitiveKeys = array_fill_keys(array_map(
             static fn (mixed $key): string => mb_strtolower((string) $key),

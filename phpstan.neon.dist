@@ -1,0 +1,22 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+
+    paths:
+        - src
+        - tests
+
+    tmpDir: build/phpstan
+
+    stubFiles:
+        - phpstan-stubs/mockery.stub
+
+    parallel:
+        maximumNumberOfProcesses: 1
+
+    excludePaths:
+        analyse:
+            - vendor
+            - build

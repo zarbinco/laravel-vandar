@@ -21,7 +21,7 @@ final class IpgLoggingRedactionTest extends TestCase
 
     public function test_ipg_logging_redacts_sensitive_payload_and_response_values(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake([
             'https://ipg.vandar.io/*' => Http::response([
@@ -45,7 +45,7 @@ final class IpgLoggingRedactionTest extends TestCase
             'national_code' => 'fake-national-code',
         ]);
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

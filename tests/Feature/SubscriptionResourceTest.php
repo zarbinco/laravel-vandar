@@ -171,7 +171,7 @@ final class SubscriptionResourceTest extends TestCase
     public function test_logging_redacts_subscription_identifiers_and_authorization_query(): void
     {
         config()->set('vandar.logging.enabled', true);
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
@@ -180,7 +180,7 @@ final class SubscriptionResourceTest extends TestCase
             'q' => 'user-supplied-value',
         ]);
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

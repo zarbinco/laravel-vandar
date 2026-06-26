@@ -23,7 +23,7 @@ final class SettlementLoggingRedactionTest extends TestCase
 
     public function test_settlement_logging_redacts_sensitive_payload_and_response_values(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake([
             'https://api.vandar.io/*' => Http::response([
@@ -41,7 +41,7 @@ final class SettlementLoggingRedactionTest extends TestCase
             'track_id' => 'fake-track-id',
         ]);
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

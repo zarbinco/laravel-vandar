@@ -100,6 +100,11 @@ final class SensitiveDataRedactor
         'images',
     ];
 
+    /**
+     * @param  array<array-key, mixed>  $payload
+     * @param  array<int, mixed>  $extraSensitiveKeys
+     * @return array<array-key, mixed>
+     */
     public static function redact(array $payload, array $extraSensitiveKeys = []): array
     {
         $sensitiveKeys = array_map(
@@ -171,6 +176,11 @@ final class SensitiveDataRedactor
         return is_string($redacted) ? $redacted : $body;
     }
 
+    /**
+     * @param  array<array-key, mixed>  $payload
+     * @param  array<string, bool>  $sensitiveKeys
+     * @return array<array-key, mixed>
+     */
     private static function redactArray(array $payload, array $sensitiveKeys): array
     {
         $redacted = [];

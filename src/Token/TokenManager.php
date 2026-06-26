@@ -272,12 +272,10 @@ final class TokenManager
             return $this->cache->lock($this->lockKey(), $this->lockSeconds());
         }
 
-        if (method_exists($this->cache, 'getStore')) {
-            $store = $this->cache->getStore();
+        $store = $this->cache->getStore();
 
-            if (is_callable([$store, 'lock'])) {
-                return $store->lock($this->lockKey(), $this->lockSeconds());
-            }
+        if (is_callable([$store, 'lock'])) {
+            return $store->lock($this->lockKey(), $this->lockSeconds());
         }
 
         return null;

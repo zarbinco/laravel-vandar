@@ -226,7 +226,7 @@ function trackedFiles(string $root): array
 function scanFiles(string $root, array $roots): array
 {
     $files = [];
-    $excludedDirectories = ['.git', 'vendor', 'node_modules', 'coverage', '.phpunit.cache', '.idea', '.vscode'];
+    $excludedDirectories = ['.git', 'vendor', 'node_modules', 'coverage', 'build', '.phpunit.cache', '.idea', '.vscode'];
 
     foreach ($roots as $scanRoot) {
         $absolute = $root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $scanRoot);

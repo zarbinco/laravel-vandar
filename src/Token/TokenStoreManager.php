@@ -46,7 +46,7 @@ final class TokenStoreManager
             throw new VandarUnsupportedTokenStoreException('A custom Vandar token store must bind TokenStore::class.');
         }
 
-        $store = $this->app->make(TokenStore::class);
+        $store = $this->app->make($this->tokenStoreAbstract());
 
         if (! $store instanceof TokenStore) {
             throw new VandarUnsupportedTokenStoreException('The custom Vandar token store binding must implement TokenStore.');
@@ -64,6 +64,11 @@ final class TokenStoreManager
         $binding = $this->app->getBindings()[TokenStore::class] ?? null;
 
         return ($binding['concrete'] ?? null) === self::$defaultResolver;
+    }
+
+    private function tokenStoreAbstract(): string
+    {
+        return TokenStore::class;
     }
 
     private function driverName(): string

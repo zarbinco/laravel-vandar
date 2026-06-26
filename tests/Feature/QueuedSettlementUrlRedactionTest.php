@@ -24,7 +24,7 @@ final class QueuedSettlementUrlRedactionTest extends TestCase
 
     public function test_find_log_redacts_queued_id_path_segment(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
@@ -32,7 +32,7 @@ final class QueuedSettlementUrlRedactionTest extends TestCase
 
         Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v3/business/test-business/settlement/queued/fake-queued-id');
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);
@@ -48,14 +48,14 @@ final class QueuedSettlementUrlRedactionTest extends TestCase
     {
         config()->set('vandar.http.retry.enabled', true);
         config()->set('vandar.http.retry.times', 3);
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
         Vandar::queuedSettlements()->cancelById('fake-queued-id');
 
         Http::assertSentCount(1);
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

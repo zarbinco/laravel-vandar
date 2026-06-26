@@ -27,8 +27,8 @@ final class CacheTokenStoreTest extends TestCase
 
         $tokens = $this->app->make(CacheTokenStore::class)->tokens();
 
-        $this->assertSame('fake-config-access-token', $tokens?->accessToken);
-        $this->assertSame('fake-config-refresh-token', $tokens?->refreshToken);
+        $this->assertSame('fake-config-access-token', $tokens->accessToken);
+        $this->assertSame('fake-config-refresh-token', $tokens->refreshToken);
     }
 
     public function test_it_saves_and_reads_tokens(): void

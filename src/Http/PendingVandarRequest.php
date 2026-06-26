@@ -242,6 +242,10 @@ final class PendingVandarRequest
     /**
      * @param  array<string, mixed>  $options
      */
+    /**
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
     private function payloadFromOptions(array $options): array
     {
         foreach (['json', 'form_params', 'body', 'query'] as $key) {
@@ -255,6 +259,7 @@ final class PendingVandarRequest
 
     /**
      * @param  array<string, mixed>  $options
+     * @param  array<int, string>  $extraSensitiveKeys
      */
     private function logSummary(string $method, string $url, array $options, VandarResponse $response, array $extraSensitiveKeys): void
     {

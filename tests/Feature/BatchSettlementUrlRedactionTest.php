@@ -24,7 +24,7 @@ final class BatchSettlementUrlRedactionTest extends TestCase
 
     public function test_details_log_redacts_batch_id_path_segment(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://batch.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
@@ -32,7 +32,7 @@ final class BatchSettlementUrlRedactionTest extends TestCase
 
         Http::assertSent(fn (Request $request): bool => $request->url() === 'https://batch.vandar.io/api/v2/business/test-business/batch-settlements/fake-batch-id');
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

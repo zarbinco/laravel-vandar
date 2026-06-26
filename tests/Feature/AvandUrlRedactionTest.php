@@ -24,7 +24,7 @@ final class AvandUrlRedactionTest extends TestCase
 
     public function test_last_balance_log_redacts_iban_path_segment(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
@@ -32,7 +32,7 @@ final class AvandUrlRedactionTest extends TestCase
 
         Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v3/business/test-business/settlement/account/IR123456789/last-balance');
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);
@@ -46,7 +46,7 @@ final class AvandUrlRedactionTest extends TestCase
 
     public function test_transaction_label_log_redacts_iban_tracking_code_and_label(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['label' => 'fake-label'], 200)]);
 
@@ -54,7 +54,7 @@ final class AvandUrlRedactionTest extends TestCase
 
         Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v3/business/test-business/settlement/account/IR123456789/transaction/fake-tracking-code/label');
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);
@@ -70,7 +70,7 @@ final class AvandUrlRedactionTest extends TestCase
 
     public function test_suspicious_payment_log_redacts_id_path_segment(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
@@ -80,7 +80,7 @@ final class AvandUrlRedactionTest extends TestCase
 
         Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v3/business/test-business/cash-in/suspicious-payment/fake-suspicious-payment-id');
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

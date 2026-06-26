@@ -23,7 +23,7 @@ final class BatchSettlementLoggingRedactionTest extends TestCase
 
     public function test_batch_settlement_logging_redacts_sensitive_values(): void
     {
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake([
             'https://batch.vandar.io/*' => Http::response([
@@ -44,7 +44,7 @@ final class BatchSettlementLoggingRedactionTest extends TestCase
             ],
         ]);
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

@@ -64,12 +64,10 @@ final class LaravelVandar
             return InstalledVersions::getPrettyVersion('zarbinco/laravel-vandar');
         }
 
-        if (method_exists(InstalledVersions::class, 'getRootPackage')) {
-            $rootPackage = InstalledVersions::getRootPackage();
+        $rootPackage = InstalledVersions::getRootPackage();
 
-            if (($rootPackage['name'] ?? null) === 'zarbinco/laravel-vandar') {
-                return $rootPackage['pretty_version'] ?? 'dev';
-            }
+        if ($rootPackage['name'] === 'zarbinco/laravel-vandar') {
+            return $rootPackage['pretty_version'];
         }
 
         return 'dev';

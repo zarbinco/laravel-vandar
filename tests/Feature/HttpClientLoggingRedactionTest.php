@@ -14,7 +14,7 @@ final class HttpClientLoggingRedactionTest extends TestCase
     public function test_logging_sanitizes_urls_and_redacts_payloads_and_responses(): void
     {
         config()->set('vandar.logging.enabled', true);
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake([
             'https://api.vandar.io/*' => Http::response([
@@ -32,7 +32,7 @@ final class HttpClientLoggingRedactionTest extends TestCase
             auth: false,
         );
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

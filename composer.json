@@ -35,6 +35,7 @@
         "illuminate/support": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
+        "larastan/larastan": "^3.0",
         "orchestra/testbench": "^9.0|^10.0",
         "phpunit/phpunit": "^10.5|^11.0|^12.0",
         "laravel/pint": "^1.18"
@@ -63,7 +64,15 @@
         "test": "vendor/bin/phpunit",
         "format": "vendor/bin/pint",
         "format:test": "vendor/bin/pint --test",
-        "audit:release": "php scripts/audit-release.php"
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "phpstan": "@analyse",
+        "audit:release": "php scripts/audit-release.php",
+        "ci": [
+            "@format:test",
+            "@analyse",
+            "@test",
+            "@audit:release"
+        ]
     },
     "minimum-stability": "stable",
     "prefer-stable": true

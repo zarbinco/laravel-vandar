@@ -278,13 +278,13 @@ final class CustomerResourceTest extends TestCase
     public function test_logging_does_not_expose_fake_tokens(): void
     {
         config()->set('vandar.logging.enabled', true);
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
         Vandar::customers()->list(['access_token' => 'fake-access-token', 'normal' => 'yes']);
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);
@@ -301,7 +301,7 @@ final class CustomerResourceTest extends TestCase
     public function test_customer_authentication_logging_redacts_identity_payload_and_customer_path(): void
     {
         config()->set('vandar.logging.enabled', true);
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
 
@@ -310,7 +310,7 @@ final class CustomerResourceTest extends TestCase
             'birthDate' => 'fake-birth-date',
         ]);
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

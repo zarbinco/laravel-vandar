@@ -51,7 +51,7 @@ final class TokenManagerTest extends TestCase
     public function test_refresh_logging_redacts_raw_token_values(): void
     {
         config()->set('vandar.logging.enabled', true);
-        Log::spy();
+        $logger = Log::spy();
 
         Http::fake([
             'https://api.vandar.io/v3/refreshtoken' => Http::response([
@@ -62,7 +62,7 @@ final class TokenManagerTest extends TestCase
 
         $this->app->make(TokenManager::class)->refresh(force: true);
 
-        Log::shouldHaveReceived('debug')
+        $logger->shouldHaveReceived('debug')
             ->once()
             ->withArgs(function (string $message, array $context): bool {
                 $encoded = json_encode($context);

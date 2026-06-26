@@ -7,7 +7,7 @@ namespace Zarbinco\LaravelVandar\Token;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Contracts\Encryption\Encrypter;
+use Illuminate\Contracts\Encryption\StringEncrypter;
 use JsonException;
 use Zarbinco\LaravelVandar\Contracts\TokenStore;
 use Zarbinco\LaravelVandar\DTO\TokenSet;
@@ -17,7 +17,7 @@ final class CacheTokenStore implements TokenStore
     public function __construct(
         private readonly CacheRepository $cache,
         private readonly ConfigRepository $config,
-        private readonly Encrypter $encrypter,
+        private readonly StringEncrypter $encrypter,
     ) {}
 
     public function accessToken(): ?string

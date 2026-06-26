@@ -13,7 +13,7 @@ use Zarbinco\LaravelVandar\LaravelVandar;
  * @method static mixed config(?string $key = null, mixed $default = null)
  * @method static string baseUrl(string $name = 'api')
  * @method static bool isLoggingEnabled()
- * @method static \Zarbinco\LaravelVandar\Testing\VandarFake fake(array $responses = [])
+ * @method static \Zarbinco\LaravelVandar\Testing\VandarFake fake(array<string, mixed> $responses = [])
  * @method static void assertSent(string $method, ?callable $callback = null)
  * @method static void assertNotSent(string $method, ?callable $callback = null)
  * @method static void assertSentCount(string $method, int $count)
@@ -35,7 +35,7 @@ use Zarbinco\LaravelVandar\LaravelVandar;
  * @method static \Zarbinco\LaravelVandar\Resources\SubscriptionResource subscriptions()
  * @method static \Zarbinco\LaravelVandar\Resources\SubscriptionResource subscription()
  * @method static \Zarbinco\LaravelVandar\Resources\SubscriptionResource directDebit()
- * @method static \Zarbinco\LaravelVandar\DTO\VandarResponse response(array $payload = [], int $status = 200, array $headers = [])
+ * @method static \Zarbinco\LaravelVandar\DTO\VandarResponse response(array<string, mixed> $payload = [], int $status = 200, array<string, mixed> $headers = [])
  *
  * @see LaravelVandar
  */

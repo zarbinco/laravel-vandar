@@ -48,8 +48,8 @@ class VandarException extends RuntimeException
     }
 
     /**
-     * @param  array<string, mixed>  $payload
-     * @return array<string, mixed>
+     * @param  array<array-key, mixed>  $payload
+     * @return array<array-key, mixed>
      */
     private static function sanitizeUrlValues(array $payload): array
     {

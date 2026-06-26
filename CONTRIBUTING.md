@@ -7,10 +7,21 @@ Thanks for helping improve Laravel Vandar SDK.
 ```bash
 composer install
 composer test
-vendor/bin/pint --test
+composer format:test
 ```
 
 Use `vendor/bin/pint` to apply formatting fixes.
+
+## Quality Checks
+
+Before opening a pull request, run:
+
+```bash
+composer format:test
+composer analyse
+composer test
+composer audit:release
+```
 
 ## Pull Requests
 
@@ -28,7 +39,8 @@ Before opening a release-oriented pull request, run:
 ```bash
 composer validate --strict
 composer dump-autoload
+composer analyse
 composer test
-vendor/bin/pint --test
-php scripts/audit-release.php
+composer format:test
+composer audit:release
 ```

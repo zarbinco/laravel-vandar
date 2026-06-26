@@ -1,0 +1,17 @@
+<?php
+
+namespace Mockery;
+
+class VerificationDirector
+{
+    public function once(): self {}
+}
+
+interface LegacyMockInterface
+{
+    /**
+     * @param  mixed  $method
+     * @param  mixed  $args
+     */
+    public function shouldHaveReceived($method = null, $args = null): VerificationDirector;
+}

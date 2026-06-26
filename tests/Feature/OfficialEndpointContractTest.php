@@ -26,7 +26,7 @@ final class OfficialEndpointContractTest extends TestCase
     }
 
     /**
-     * @param  Closure(): void  $call
+     * @param  Closure(): mixed  $call
      * @param  Closure(Request): bool|null  $payload
      */
     #[DataProvider('implementedEndpointContracts')]
@@ -131,7 +131,7 @@ final class OfficialEndpointContractTest extends TestCase
     }
 
     /**
-     * @return array<string, array{Closure(): void, string, string, bool, 4?: Closure(Request): bool}>
+     * @return array<string, array{Closure(): mixed, string, string, bool, 4?: Closure(Request): bool}>
      */
     public static function implementedEndpointContracts(): array
     {
@@ -659,7 +659,7 @@ final class OfficialEndpointContractTest extends TestCase
     }
 
     /**
-     * @return array{Closure(): void, string, string, bool, Closure(Request): bool}
+     * @return array{Closure(): mixed, string, string, bool, Closure(Request): bool}
      */
     private static function inquiryCase(string $endpoint, Closure $call): array
     {

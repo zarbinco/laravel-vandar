@@ -65,12 +65,12 @@ final class TokenStoreManagerTest extends TestCase
         $config = new Repository(['vandar' => ['tokens' => ['store' => 'custom']]]);
         $store = new class implements TokenStore
         {
-            public function accessToken(): ?string
+            public function accessToken(): string
             {
                 return 'fake-access-token';
             }
 
-            public function refreshToken(): ?string
+            public function refreshToken(): string
             {
                 return 'fake-refresh-token';
             }
