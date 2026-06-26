@@ -10,6 +10,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 use Throwable;
 use Zarbinco\LaravelVandar\DTO\VandarResponse;
 use Zarbinco\LaravelVandar\Exceptions\VandarRequestException;
@@ -156,13 +157,51 @@ final class PendingVandarRequest
 
     private function toVandarResponse(Response $response): VandarResponse
     {
-        $json = $response->json();
+        $body = $response->body();
+        $json = [];
+        $jsonParseFailed = false;
+
+        if (trim($body) !== '') {
+            try {
+                $decoded = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+
+                if (is_array($decoded)) {
+                    $json = $decoded;
+                } elseif ($this->headersContainJsonContentType($response->headers())) {
+                    $jsonParseFailed = true;
+                }
+            } catch (JsonException) {
+                $jsonParseFailed = true;
+            }
+        }
 
         return new VandarResponse(
             status: $response->status(),
-            json: is_array($json) ? $json : [],
+            json: $json,
             headers: $response->headers(),
+            body: $body,
+            jsonParseFailed: $jsonParseFailed,
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $headers
+     */
+    private function headersContainJsonContentType(array $headers): bool
+    {
+        foreach ($headers as $name => $value) {
+            if (mb_strtolower((string) $name) !== 'content-type') {
+                continue;
+            }
+
+            foreach ((array) $value as $headerValue) {
+                if (is_scalar($headerValue) && str_contains(mb_strtolower((string) $headerValue), 'json')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

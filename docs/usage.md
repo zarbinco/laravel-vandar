@@ -140,3 +140,17 @@ $code = Vandar::cashIn()->code();
 ```
 
 All resource calls return `Zarbinco\LaravelVandar\DTO\VandarResponse`.
+
+`json()` returns the parsed JSON array when available. `body()` keeps the raw response body for debugging, and `redactedBody()` returns a safer text body for logs. Use `jsonParseFailed()` to detect malformed JSON or unexpected upstream response bodies. Never log raw response bodies in production.
+
+```php
+$response = Vandar::ipg()->verify($token);
+
+if ($response->jsonParseFailed()) {
+    logger()->warning('Unexpected Vandar response body', [
+        'status' => $response->status(),
+        'content_type' => $response->contentType(),
+        'body' => $response->redactedBody(),
+    ]);
+}
+```

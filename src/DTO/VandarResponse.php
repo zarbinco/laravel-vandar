@@ -15,6 +15,8 @@ use Zarbinco\LaravelVandar\Support\SensitiveDataRedactor;
 
 final class VandarResponse
 {
+    private const REDACTED_BODY_LIMIT = 4000;
+
     /**
      * @param  array<string, mixed>  $json
      * @param  array<string, mixed>  $headers
@@ -23,6 +25,8 @@ final class VandarResponse
         private readonly int $status,
         private readonly array $json = [],
         private readonly array $headers = [],
+        private readonly ?string $body = null,
+        private readonly bool $jsonParseFailed = false,
     ) {}
 
     public function status(): int
@@ -48,6 +52,58 @@ final class VandarResponse
         }
 
         return is_array($data) ? Arr::get($data, $key, $default) : $default;
+    }
+
+    public function body(): ?string
+    {
+        return $this->body;
+    }
+
+    public function hasBody(): bool
+    {
+        return is_string($this->body) && trim($this->body) !== '';
+    }
+
+    public function jsonParseFailed(): bool
+    {
+        return $this->jsonParseFailed;
+    }
+
+    public function contentType(): ?string
+    {
+        $contentType = $this->header('Content-Type');
+
+        if (is_array($contentType)) {
+            foreach ($contentType as $value) {
+                if (is_scalar($value) && trim((string) $value) !== '') {
+                    return (string) $value;
+                }
+            }
+
+            return null;
+        }
+
+        if (is_scalar($contentType) && trim((string) $contentType) !== '') {
+            return (string) $contentType;
+        }
+
+        return null;
+    }
+
+    public function isJson(): bool
+    {
+        $contentType = $this->contentType();
+
+        return is_string($contentType) && str_contains(mb_strtolower($contentType), 'json');
+    }
+
+    public function redactedBody(): ?string
+    {
+        if ($this->body === null) {
+            return null;
+        }
+
+        return $this->truncateBody(SensitiveDataRedactor::redactText($this->body));
     }
 
     /**
@@ -273,7 +329,7 @@ final class VandarResponse
     }
 
     /**
-     * @return array{status: int, json: array<string, mixed>, headers: array<string, mixed>}
+     * @return array{status: int, json: array<string, mixed>, headers: array<string, mixed>, redacted_body: ?string, json_parse_failed: bool, content_type: ?string}
      */
     public function toArray(): array
     {
@@ -281,6 +337,9 @@ final class VandarResponse
             'status' => $this->status,
             'json' => $this->json,
             'headers' => $this->headers,
+            'redacted_body' => $this->redactedBody(),
+            'json_parse_failed' => $this->jsonParseFailed(),
+            'content_type' => $this->contentType(),
         ];
     }
 
@@ -291,5 +350,14 @@ final class VandarResponse
     private function keyList(array|string $keys): array
     {
         return is_array($keys) ? array_values($keys) : [$keys];
+    }
+
+    private function truncateBody(string $body): string
+    {
+        if (mb_strlen($body) <= self::REDACTED_BODY_LIMIT) {
+            return $body;
+        }
+
+        return mb_substr($body, 0, self::REDACTED_BODY_LIMIT);
     }
 }

@@ -51,6 +51,12 @@ class VandarRequestException extends VandarException
     {
         $response = SensitiveDataRedactor::redact($response);
 
+        foreach (['body', 'redacted_body'] as $bodyKey) {
+            if (isset($response[$bodyKey]) && is_string($response[$bodyKey])) {
+                $response[$bodyKey] = SensitiveDataRedactor::redactText($response[$bodyKey]);
+            }
+        }
+
         if (isset($response['url']) && is_string($response['url'])) {
             $response['url'] = SensitiveUrlSanitizer::sanitize($response['url']);
         }

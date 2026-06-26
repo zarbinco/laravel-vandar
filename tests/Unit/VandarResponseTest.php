@@ -99,6 +99,100 @@ final class VandarResponseTest extends TestCase
         $this->assertTrue($response->bool('invalid_bool', true));
     }
 
+    public function test_body_returns_raw_body(): void
+    {
+        $response = new VandarResponse(200, body: '{"token":"fake-token"}');
+
+        $this->assertSame('{"token":"fake-token"}', $response->body());
+    }
+
+    public function test_has_body_is_false_for_null_empty_and_whitespace_body(): void
+    {
+        $this->assertFalse((new VandarResponse(200))->hasBody());
+        $this->assertFalse((new VandarResponse(200, body: ''))->hasBody());
+        $this->assertFalse((new VandarResponse(200, body: " \n\t "))->hasBody());
+        $this->assertTrue((new VandarResponse(200, body: 'ok'))->hasBody());
+    }
+
+    public function test_json_parse_failed_returns_stored_flag(): void
+    {
+        $this->assertTrue((new VandarResponse(200, jsonParseFailed: true))->jsonParseFailed());
+        $this->assertFalse((new VandarResponse(200))->jsonParseFailed());
+    }
+
+    public function test_content_type_reads_header_case_insensitively(): void
+    {
+        $response = new VandarResponse(200, headers: [
+            'content-type' => ['application/json; charset=utf-8'],
+        ]);
+
+        $this->assertSame('application/json; charset=utf-8', $response->contentType());
+    }
+
+    public function test_is_json_detects_json_content_types(): void
+    {
+        $json = new VandarResponse(200, headers: ['Content-Type' => ['application/json']]);
+        $problemJson = new VandarResponse(200, headers: ['Content-Type' => ['application/problem+json']]);
+        $html = new VandarResponse(200, headers: ['Content-Type' => ['text/html']]);
+
+        $this->assertTrue($json->isJson());
+        $this->assertTrue($problemJson->isJson());
+        $this->assertFalse($html->isJson());
+    }
+
+    public function test_redacted_body_redacts_sensitive_json_and_plain_text_values(): void
+    {
+        $response = new VandarResponse(200, body: implode("\n", [
+            '{"token":"fake-token","apiKey":"fake-api-key","cardNumber":"fake-card","email":"fake@example.test"}',
+            'Authorization: Bearer fake-authorization-token',
+            'iban=fake-iban&sheba=fake-sheba&mobile=fake-mobile',
+        ]));
+
+        $redactedBody = $response->redactedBody();
+
+        $this->assertIsString($redactedBody);
+        $this->assertStringContainsString('[REDACTED]', $redactedBody);
+        $this->assertStringNotContainsString('fake-token', $redactedBody);
+        $this->assertStringNotContainsString('fake-api-key', $redactedBody);
+        $this->assertStringNotContainsString('fake-card', $redactedBody);
+        $this->assertStringNotContainsString('fake@example.test', $redactedBody);
+        $this->assertStringNotContainsString('fake-authorization-token', $redactedBody);
+        $this->assertStringNotContainsString('fake-iban', $redactedBody);
+        $this->assertStringNotContainsString('fake-sheba', $redactedBody);
+        $this->assertStringNotContainsString('fake-mobile', $redactedBody);
+    }
+
+    public function test_to_array_does_not_expose_raw_sensitive_body_values(): void
+    {
+        $response = new VandarResponse(
+            status: 500,
+            headers: ['Content-Type' => ['application/json']],
+            body: '{"token":"fake-secret-token"}',
+            jsonParseFailed: true,
+        );
+
+        $array = $response->toArray();
+        $encoded = json_encode($array);
+
+        $this->assertArrayHasKey('redacted_body', $array);
+        $this->assertArrayNotHasKey('body', $array);
+        $this->assertSame(true, $array['json_parse_failed']);
+        $this->assertSame('application/json', $array['content_type']);
+        $this->assertIsString($encoded);
+        $this->assertStringNotContainsString('fake-secret-token', $encoded);
+        $this->assertStringContainsString('[REDACTED]', $encoded);
+    }
+
+    public function test_new_constructor_parameters_are_optional(): void
+    {
+        $response = new VandarResponse(200, ['ok' => true], ['X-Test' => ['yes']]);
+
+        $this->assertSame(['ok' => true], $response->json());
+        $this->assertSame(['X-Test' => ['yes']], $response->headers());
+        $this->assertNull($response->body());
+        $this->assertFalse($response->jsonParseFailed());
+    }
+
     /**
      * @param  class-string<\Throwable>  $exception
      */

@@ -224,9 +224,27 @@ $response->data();
 $response->message();
 $response->errors();
 $response->trackId();
+$response->body();
+$response->redactedBody();
+$response->jsonParseFailed();
+$response->contentType();
 $response->successful();
 $response->failed();
 $response->throw();
+```
+
+`json()` returns the parsed JSON array when Vandar sends JSON. `body()` returns the raw response body for debugging unexpected upstream responses. Never log the raw body in production; use `redactedBody()` or the redacted `toArray()` output instead. `jsonParseFailed()` can help detect malformed JSON, HTML error pages, or other unexpected response bodies.
+
+```php
+$response = Vandar::ipg()->verify($token);
+
+if ($response->jsonParseFailed()) {
+    logger()->warning('Unexpected Vandar response body', [
+        'status' => $response->status(),
+        'content_type' => $response->contentType(),
+        'body' => $response->redactedBody(),
+    ]);
+}
 ```
 
 `throw()` maps common failed statuses to package exceptions such as authentication, authorization, validation, rate-limit, server, and generic request exceptions.

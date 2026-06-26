@@ -8,6 +8,8 @@ final class SensitiveDataRedactor
 {
     private const REDACTED = '[redacted]';
 
+    private const TEXT_REDACTED = '[REDACTED]';
+
     private const DEFAULT_SENSITIVE_KEYS = [
         'access_token',
         'refresh_token',
@@ -22,10 +24,12 @@ final class SensitiveDataRedactor
         'password',
         'secret',
         'valid_card_number',
+        'pan',
         'card',
         'card_number',
         'cardnumber',
         'iban',
+        'sheba',
         'destination_iban',
         'source_iban',
         'account_number',
@@ -41,6 +45,7 @@ final class SensitiveDataRedactor
         'mobile',
         'mobile_number',
         'phone',
+        'email',
         'cid',
         'refnumber',
         'tracking_code',
@@ -87,6 +92,67 @@ final class SensitiveDataRedactor
         return self::redactArray($payload, array_fill_keys($sensitiveKeys, true));
     }
 
+    public static function redactText(string $body): string
+    {
+        $keys = self::bodySensitiveKeyPattern();
+
+        $redacted = preg_replace_callback(
+            '/((["\'])\s*(?:'.$keys.')\s*\2\s*:\s*)(["\'])(?:\\\\.|(?!\3).)*\3/iu',
+            static fn (array $matches): string => $matches[1].$matches[3].self::TEXT_REDACTED.$matches[3],
+            $body,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace_callback(
+            '/((["\'])\s*(?:'.$keys.')\s*\2\s*:\s*)(?!["\'{\[])([^,\}\]\r\n]+)/iu',
+            static fn (array $matches): string => $matches[1].self::TEXT_REDACTED,
+            $redacted,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace(
+            '/\b(authorization)\s*([=:])\s*([^\r\n&;,]+)/iu',
+            '$1$2'.self::TEXT_REDACTED,
+            $redacted,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace(
+            '/\b('.$keys.')\s*([=:])\s*([^\s&;,]+)/iu',
+            '$1$2'.self::TEXT_REDACTED,
+            $redacted,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace(
+            '/"(?:\\\\.|[^"\\\\])*(?:access[_-]?token|refresh[_-]?token|api[_-]?key|bearer)(?:\\\\.|[^"\\\\])*"(?!\s*:)/iu',
+            '"'.self::TEXT_REDACTED.'"',
+            $redacted,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace(
+            "/'(?:\\\\.|[^'\\\\])*(?:access[_-]?token|refresh[_-]?token|api[_-]?key|bearer)(?:\\\\.|[^'\\\\])*'(?!\s*:)/iu",
+            "'".self::TEXT_REDACTED."'",
+            $redacted,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace(
+            '/(?<!["\'])\b[^\s"\'<>&;,]*(?:access[_-]?token|refresh[_-]?token|api[_-]?key|bearer)[^\s"\'<>&;,]*/iu',
+            self::TEXT_REDACTED,
+            $redacted,
+        );
+
+        return is_string($redacted) ? $redacted : $body;
+    }
+
     private static function redactArray(array $payload, array $sensitiveKeys): array
     {
         $redacted = [];
@@ -104,5 +170,32 @@ final class SensitiveDataRedactor
         }
 
         return $redacted;
+    }
+
+    private static function bodySensitiveKeyPattern(): string
+    {
+        return implode('|', array_map(
+            static fn (string $key): string => preg_quote($key, '/'),
+            [
+                'token',
+                'access_token',
+                'refresh_token',
+                'api_key',
+                'apiKey',
+                'apikey',
+                'authorization',
+                'Authorization',
+                'card_number',
+                'cardNumber',
+                'cardnumber',
+                'pan',
+                'iban',
+                'sheba',
+                'cid',
+                'mobile',
+                'phone',
+                'email',
+            ],
+        ));
     }
 }

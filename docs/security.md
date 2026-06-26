@@ -18,6 +18,8 @@ Package logging is disabled by default. When enabled, the package redacts known 
 
 IPG callback payloads and verify responses can include payment tokens, transaction identifiers, card hashes, CID values, amounts, and other payment data. Log them only after redaction.
 
+`VandarResponse::body()` exposes the raw upstream response body for debugging. Do not log raw bodies in production. Prefer `redactedBody()` or `toArray()`, which includes only `redacted_body` and never includes the raw body value.
+
 ## Money-Moving Requests
 
 Payment, refund, settlement, queued settlement, batch settlement, Avand deposit, transaction label writes, and suspicious-payment resolution calls should be protected with authorization, idempotency, audit logging, duplicate-prevention, and reconciliation.

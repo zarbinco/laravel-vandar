@@ -259,4 +259,49 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['reference']);
         $this->assertSame('visible', $redacted['safe']);
     }
+
+    public function test_it_redacts_sensitive_json_like_body_text(): void
+    {
+        $body = '{"token":"fake-token","apiKey":"fake-api-key","nested":{"email":"fake@example.test","pan":"fake-pan"}}';
+
+        $redacted = SensitiveDataRedactor::redactText($body);
+
+        $this->assertSame(
+            '{"token":"[REDACTED]","apiKey":"[REDACTED]","nested":{"email":"[REDACTED]","pan":"[REDACTED]"}}',
+            $redacted,
+        );
+    }
+
+    public function test_it_redacts_sensitive_plain_text_body_values(): void
+    {
+        $body = "token=fake-token&iban=fake-iban\nAuthorization: Bearer fake-authorization-token\nphone=fake-phone";
+
+        $redacted = SensitiveDataRedactor::redactText($body);
+
+        $this->assertSame(
+            "token=[REDACTED]&iban=[REDACTED]\nAuthorization:[REDACTED]\nphone=[REDACTED]",
+            $redacted,
+        );
+    }
+
+    public function test_body_text_redaction_is_deterministic(): void
+    {
+        $body = 'mobile=fake-mobile&cid=fake-cid';
+
+        $this->assertSame(
+            SensitiveDataRedactor::redactText($body),
+            SensitiveDataRedactor::redactText($body),
+        );
+    }
+
+    public function test_it_redacts_token_shaped_words_in_body_text(): void
+    {
+        $body = 'Denied fake-access-token and fake-refresh-token.';
+
+        $redacted = SensitiveDataRedactor::redactText($body);
+
+        $this->assertStringNotContainsString('fake-access-token', $redacted);
+        $this->assertStringNotContainsString('fake-refresh-token', $redacted);
+        $this->assertStringContainsString('[REDACTED]', $redacted);
+    }
 }
