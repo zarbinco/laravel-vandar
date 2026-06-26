@@ -15,11 +15,11 @@
 - Queued settlements
 - Batch settlements
 - Avand/Cash-in
+- Subscription / Direct Debit
 - Testing fakes
 
 ## Planned
 
-- Direct debit APIs
 - Ravand, card issuing, and banking APIs
 - Optional encrypted database token store
 - More typed response DTOs where useful
@@ -33,4 +33,4 @@
 - Business workflows
 - Accounting or voucher logic
 
-The package should remain SDK-first and app-agnostic. Application models, migrations, routes, controllers, workflows, and persistence belong in consuming Laravel applications.
+The package should remain SDK-first and app-agnostic. Application models, migrations, routes, controllers, workflows, payment records, wallet updates, reconciliation, logging policy, and persistence belong in consuming Laravel applications.

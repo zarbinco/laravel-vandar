@@ -14,9 +14,10 @@ Current notes:
 
 - Customer cards are supported.
 - Customer authentication and customer cash-in-code endpoints are supported.
-- Subscription / Direct Debit endpoints are supported through `Vandar::subscriptions()`, `Vandar::subscription()`, and `Vandar::directDebit()`.
+- Subscription / Direct Debit endpoints are supported through `Vandar::subscriptions()`, `Vandar::subscription()`, and `Vandar::directDebit()`. Merchant or account activation may be required on Vandar's side.
 - Ravand remains a future module and is not advertised as supported.
 - Customer IBAN delete path ambiguity remains documented in the matrix below.
+- Endpoint support means the SDK/client method exists. It does not mean this package provides payment, invoice, wallet, order, reconciliation, or logging workflows.
 
 | Service area | Official endpoint / method | Package resource / method | Status | Notes |
 | --- | --- | --- | --- | --- |
@@ -53,8 +54,8 @@ Current notes:
 | Customer fields | `GET /v2/business/:business/customers/fields/:field_id` | `CustomerFieldResource::find()` / `show()` | supported |  |
 | Customer fields | Possible docs typo `/v2/business/business/customers/fields` | `CustomerFieldResource::*` | docs ambiguity | The package keeps the `:business` segment and does not hard-code `business`. |
 | Customer wallet | `GET /v2/business/:business/customers/:customer/wallet` | `CustomerResource::walletBalance()` | supported |  |
-| Customer wallet | `POST /v2/business/:business/customers/:customer/wallet/deposit` | `CustomerResource::walletDeposit()` | supported | Unsafe request is not retried automatically unless explicit rate-limit opt-in is enabled. |
-| Customer wallet | `POST /v2/business/:business/customers/:customer/wallet/withdraw` | `CustomerResource::walletWithdraw()` | supported | Unsafe request is not retried automatically unless explicit rate-limit opt-in is enabled. |
+| Customer wallet | `POST /v2/business/:business/customers/:customer/wallet/deposit` | `CustomerResource::walletDeposit()` | supported | Unsafe request is not retried automatically unless explicit rate-limit opt-in is enabled. Application wallet/ledger updates remain app-owned. |
+| Customer wallet | `POST /v2/business/:business/customers/:customer/wallet/withdraw` | `CustomerResource::walletWithdraw()` | supported | Unsafe request is not retried automatically unless explicit rate-limit opt-in is enabled. Application wallet/ledger updates remain app-owned. |
 | Customer transactions | `POST /v2/business/:business/customers/:customer/transactions` | `CustomerResource::transactions()` | supported |  |
 | Customer authentication | `POST /v3/business/:business/customers/:customer/authentication/kyc` | `CustomerResource::authenticationKyc()` | supported | Customer authentication requires activation from Vandar support according to the official docs. |
 | Customer authentication | `POST /v3/business/:business/customers/:customer/authentication/shahkar` | `CustomerResource::authenticationShahkar()` | supported | Customer-specific authentication endpoints are separate from the generic inquiry endpoints below. |
@@ -98,7 +99,7 @@ Current notes:
 | Cash-in account | `GET /v3/business/:business/cash-in/account` | `AvandResource::account()` / `cashInAccount()` | supported |  |
 | Cash-in account | `POST /v3/business/:business/cash-in/account/deposit` | `AvandResource::deposit()` | supported | Money-moving request is not retried automatically. |
 | Cash-in account | `POST /v3/business/:business/cash-in/account/balance` | `AvandResource::balance()` | supported |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/banks/actives` | `SubscriptionResource::activeBanks()` / `banks()` | supported | Direct Debit / Subscription services may require activation from Vandar. |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/banks/actives` | `SubscriptionResource::activeBanks()` / `banks()` | supported | Direct Debit / Subscription services may require merchant or account activation from Vandar. |
 | Subscription / direct debit | `POST /v3/business/:business/subscription/authorization/store` | `SubscriptionResource::createAuthorization()` / `storeAuthorization()` | supported | Side-effect request is not retried automatically by default. |
 | Subscription / direct debit | `GET https://subscription.vandar.io/authorizations/:token` | `SubscriptionResource::authorizationUrl()` / `authorizationRedirectUrl()` / `mandateUrl()` | supported | Returns a browser redirect URL string; no HTTP request is made. |
 | Subscription / direct debit | `PATCH /v3/business/:business/subscription/authorization/:authorization_id/verify` | `SubscriptionResource::verifyAuthorization()` | supported | Side-effect request is not retried automatically by default. |

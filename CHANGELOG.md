@@ -23,6 +23,9 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 - Updated documentation for Packagist installation and auto-update setup.
 - Improved package documentation, security guidance, and contribution workflow.
+- Clarified the SDK/client boundary, application-owned payment records, callback verification, idempotency, reconciliation, logging policy, and multi-server token cache guidance.
+- Corrected roadmap documentation to list Subscription / Direct Debit as available and keep Ravand as future work.
+- Updated testing documentation for Subscription / Direct Debit fake labels.
 - Improved URL and payload handling for package logs and exception context.
 - Polished the endpoint support matrix for customer card and subscription/direct-debit coverage.
 - Polished package documentation and release readiness checks.

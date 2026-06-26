@@ -24,6 +24,8 @@ Package exception context is redacted by the package. Direct response arrays in 
 
 Token refresh is lock-protected when the configured cache store supports locks. Tune lock wait, refresh attempts, and retry sleep through the `VANDAR_TOKEN_*` environment values in `config/vandar.php`.
 
+For multi-server production deployments, use a shared Laravel cache store such as Redis with `VANDAR_TOKEN_STORE=cache` so refreshed tokens and refresh locks are shared across workers.
+
 Rate-limit handling is conservative. Safe methods may respect `Retry-After`, but money-moving retries are disabled by default:
 
 ```env
@@ -47,6 +49,8 @@ Vandar::directDebit()
 ```
 
 Direct Debit authorization, withdrawal, and refund identifiers are sensitive. Store them safely and avoid logging raw values.
+
+Merchant or account activation may be required on Vandar's side. The package exposes client methods only; your application still owns mandate records, withdrawal records, refunds, status updates, reconciliation, and duplicate prevention.
 
 ### Static analysis and CI
 

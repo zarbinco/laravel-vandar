@@ -1,6 +1,6 @@
 # Security Notes
 
-Treat this package as a transport layer. Your application remains responsible for authorization, persistence, retention, reconciliation, access control, and operational review.
+Treat this package as a transport layer. It does not replace application-side payment, invoice, wallet, order, ledger, or reconciliation records. Your application remains responsible for authorization, persistence, retention, reconciliation, access control, logging policy, and operational review.
 
 ## API keys and tokens
 
@@ -16,6 +16,8 @@ Sensitive credential values include:
 - Packagist or GitHub tokens used by maintainers
 
 Refresh tokens are especially sensitive because they can be exchanged for new access tokens. The token refresh command does not print access or refresh tokens.
+
+In multi-server production deployments, use a shared cache such as Redis for the cache token store so refreshed tokens and refresh locks are shared across workers.
 
 ## Raw response bodies
 

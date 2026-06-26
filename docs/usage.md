@@ -2,6 +2,16 @@
 
 This package is unofficial and is not affiliated with Vandar. Examples use fake placeholder values only.
 
+The package is pre-1.0. Review `CHANGELOG.md`, `UPGRADE.md`, and the endpoint support matrix before upgrading early releases.
+
+## Package Boundary
+
+`zarbinco/laravel-vandar` is a Laravel SDK/client for Vandar APIs. It builds requests, sends them, returns `VandarResponse`, refreshes tokens, redacts package logs, and provides test fakes.
+
+It does not create a payment workflow, mark invoices/orders as paid, update wallets or ledgers, replace application payment records, or define routes, controllers, models, migrations, jobs, or reconciliation logic.
+
+Your application must verify callbacks, handle idempotency, match amount, factor number/order id, token, and transaction id, update invoice/wallet/payment records, reconcile with Vandar, and decide what can be logged.
+
 ## Installation
 
 The package is available on Packagist:
@@ -24,6 +34,8 @@ VANDAR_RETRY_MONEY_MOVING_REQUESTS=false
 ```
 
 Token refresh is lock-protected to reduce duplicate refresh calls when many requests hit near token expiry. Vandar also applies request limits; safe methods may be retried once on `429`, while money-moving requests are not retried by default.
+
+In multi-server production deployments, back the `cache` token store with a shared cache such as Redis so refreshed tokens and locks are visible to every worker.
 
 ## API Resources
 
@@ -100,6 +112,8 @@ $deletedCustomerCashInCode = Vandar::customers()->deleteCashInCode('fake-custome
 ```
 
 Customer cash-in-code is different from business-level Avand cash-in code. Do not log sensitive identity payloads without redaction.
+
+Customer wallet deposit/withdraw endpoints only send Vandar requests. Your application remains responsible for local wallet balances, ledger entries, duplicate prevention, and reconciliation.
 
 ## Cards And IBANs
 
@@ -201,7 +215,7 @@ $batch = Vandar::batchSettlements()->create([
 
 ## Subscription / Direct Debit
 
-Direct Debit / Subscription services may require activation from Vandar. The authorization redirect URL is for sending the user to the Vandar or bank authorization flow. The package only sends requests and returns `VandarResponse`; your application must store authorization IDs, withdrawal IDs, track IDs, refund IDs, and statuses safely.
+Direct Debit / Subscription services may require merchant or account activation from Vandar. The authorization redirect URL is for sending the user to the Vandar or bank authorization flow. The package only sends requests and returns `VandarResponse`; your application must store authorization IDs, withdrawal IDs, track IDs, refund IDs, and statuses safely.
 
 ```php
 $banks = Vandar::subscriptions()->activeBanks();

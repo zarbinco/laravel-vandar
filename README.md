@@ -8,6 +8,23 @@
 
 This package sends requests and returns Vandar responses. It does not create application payment workflows, persist responses, or mark invoices/orders as paid.
 
+## Package Boundary
+
+This package is an SDK/client only. It does:
+
+- Build and send Vandar API requests from Laravel
+- Return `VandarResponse` objects and mapped package exceptions
+- Provide token refresh helpers, redacted package logging, and HTTP fakes
+
+It does not:
+
+- Mark invoices, orders, wallets, or subscriptions as paid or updated
+- Replace application-side payment, invoice, wallet, order, or ledger records
+- Provide routes, controllers, models, migrations, queues, reconciliation jobs, or a full payment workflow
+- Decide your logging, retention, authorization, or operational review policy
+
+Your Laravel application must verify callbacks, match amount, factor number/order id, token, and transaction id, update records idempotently, reconcile with Vandar, and choose what is safe to log.
+
 ## Features
 
 - Laravel service provider, facade, config publishing, and package auto-discovery
@@ -63,6 +80,8 @@ VANDAR_RETRY_MONEY_MOVING_REQUESTS=false
 ```
 
 Supported token stores are `config`, `cache`, and `custom`. The cache store encrypts cached token payloads by default.
+
+For multi-server production deployments, use a shared Laravel cache store such as Redis for `VANDAR_TOKEN_STORE=cache` so refreshed tokens and refresh locks are shared across workers.
 
 Refresh the configured access token:
 
@@ -176,6 +195,8 @@ Subscription / Direct Debit aliases:
 Vandar::subscription()
 Vandar::directDebit()
 ```
+
+Subscription / Direct Debit services may require merchant or account activation on Vandar's side. The package exposes the client methods only; your application still stores mandates, authorization IDs, withdrawals, refunds, and reconciliation state.
 
 See [docs/usage.md](docs/usage.md) for examples and [docs/endpoint-support.md](docs/endpoint-support.md) for the endpoint support matrix. Ravand is not implemented and remains future work.
 
