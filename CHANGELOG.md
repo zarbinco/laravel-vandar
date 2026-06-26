@@ -14,6 +14,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Added testing utilities for faking Vandar API responses.
 - Added release audit script and GitHub Actions workflow.
 - Added official Vandar endpoint support matrix and contract tests for implemented resources.
+- Added customer authentication and customer cash-in-code endpoint coverage.
 
 ### Changed
 

@@ -142,6 +142,66 @@ final class CustomerResource
         return $this->client->post('api', VandarPath::join($this->customerPath($customer, $business), 'transactions'), $payload);
     }
 
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function authenticationKyc(string|int $customer, array $payload, ?string $business = null): VandarResponse
+    {
+        return $this->client->request(
+            'POST',
+            'api',
+            VandarPath::join($this->customerV3Path($customer, $business), 'authentication/kyc'),
+            [
+                'json' => $payload,
+                '_sensitive_path_segments' => [(string) $customer],
+            ],
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function authenticationShahkar(string|int $customer, array $payload, ?string $business = null): VandarResponse
+    {
+        return $this->client->request(
+            'POST',
+            'api',
+            VandarPath::join($this->customerV3Path($customer, $business), 'authentication/shahkar'),
+            [
+                'json' => $payload,
+                '_sensitive_path_segments' => [(string) $customer],
+            ],
+        );
+    }
+
+    public function cashInCode(string|int $customer, ?string $business = null): VandarResponse
+    {
+        return $this->client->request(
+            'GET',
+            'api',
+            VandarPath::join($this->customerV3Path($customer, $business), 'cash-in-code'),
+            [
+                'query' => [],
+                '_sensitive_path_segments' => [(string) $customer],
+            ],
+        );
+    }
+
+    public function deleteCashInCode(string|int $customer, ?string $business = null): VandarResponse
+    {
+        return $this->client->request(
+            'DELETE',
+            'api',
+            VandarPath::join($this->customerV3Path($customer, $business), 'cash-in-code/destroy'),
+            [
+                'json' => [],
+                '_sensitive_path_segments' => [(string) $customer],
+            ],
+            auth: true,
+            allowRetry: false,
+        );
+    }
+
     private function basePath(?string $business = null): string
     {
         return VandarPath::join('v2/business', $this->business->segment($business), 'customers');
@@ -150,6 +210,16 @@ final class CustomerResource
     private function customerPath(string|int $customer, ?string $business = null): string
     {
         return VandarPath::join($this->basePath($business), VandarPath::segment($customer));
+    }
+
+    private function customerV3Path(string|int $customer, ?string $business = null): string
+    {
+        return VandarPath::join(
+            'v3/business',
+            $this->business->segment($business),
+            'customers',
+            VandarPath::segment($customer),
+        );
     }
 
     /**

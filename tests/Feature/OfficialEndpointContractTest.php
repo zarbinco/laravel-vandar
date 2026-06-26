@@ -79,6 +79,10 @@ final class OfficialEndpointContractTest extends TestCase
         $this->assertStringContainsString('docs/endpoint-support.md', $readme);
         $this->assertStringContainsString('Customer cards', $matrix);
         $this->assertStringContainsString('Customer card endpoints are documented by Vandar and covered by package contract tests.', $matrix);
+        $this->assertStringContainsString('CustomerResource::authenticationKyc()', $matrix);
+        $this->assertStringContainsString('CustomerResource::authenticationShahkar()', $matrix);
+        $this->assertStringContainsString('CustomerResource::cashInCode()', $matrix);
+        $this->assertStringContainsString('CustomerResource::deleteCashInCode()', $matrix);
         $this->assertStringContainsString('Subscription / direct debit', $matrix);
         $this->assertStringContainsString('future module', $matrix);
         $this->assertStringNotContainsString('official facts used here did not enumerate each customer-card endpoint', $matrix);
@@ -318,6 +322,40 @@ final class OfficialEndpointContractTest extends TestCase
                 'https://api.vandar.io/v2/business/test-business/customers/fake-customer-id/transactions',
                 true,
                 static fn (Request $request): bool => $request['page'] === 1,
+            ],
+            'customer authentication kyc' => [
+                static fn (): mixed => Vandar::customers()->authenticationKyc('fake-customer-id', [
+                    'national_code' => 'fake-national-code',
+                    'birth_date' => 'fake-birth-date',
+                ]),
+                'POST',
+                'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/authentication/kyc',
+                true,
+                static fn (Request $request): bool => $request['national_code'] === 'fake-national-code'
+                    && $request['birth_date'] === 'fake-birth-date',
+            ],
+            'customer authentication shahkar' => [
+                static fn (): mixed => Vandar::customers()->authenticationShahkar('fake-customer-id', [
+                    'mobile' => 'fake-mobile',
+                    'national_code' => 'fake-national-code',
+                ]),
+                'POST',
+                'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/authentication/shahkar',
+                true,
+                static fn (Request $request): bool => $request['mobile'] === 'fake-mobile'
+                    && $request['national_code'] === 'fake-national-code',
+            ],
+            'customer cash in code' => [
+                static fn (): mixed => Vandar::customers()->cashInCode('fake-customer-id'),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/cash-in-code',
+                true,
+            ],
+            'customer delete cash in code' => [
+                static fn (): mixed => Vandar::customers()->deleteCashInCode('fake-customer-id'),
+                'DELETE',
+                'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/cash-in-code/destroy',
+                true,
             ],
             'cards create' => [
                 static fn (): mixed => Vandar::cards()->create('fake-customer-id', ['card' => 'fake-card']),

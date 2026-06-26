@@ -133,11 +133,16 @@ final class SensitiveDataRedactorTest extends TestCase
     {
         $payload = [
             'national_code' => 'fake-national-code',
+            'nationalCode' => 'fake-national-code',
             'individual_national_code' => 'fake-individual-national-code',
             'legal_national_code' => 'fake-legal-national-code',
             'fida_code' => 'fake-fida-code',
             'birthday' => 'fake-birthday',
             'birth_date' => 'fake-birth-date',
+            'birthDate' => 'fake-birth-date',
+            'birthCertificateNumber' => 'fake-birth-certificate-number',
+            'identity_number' => 'fake-identity-number',
+            'identityNumber' => 'fake-identity-number',
             'postal_code' => 'fake-postal-code',
             'card' => 'fake-card',
             'iban' => 'fake-iban',
@@ -149,11 +154,16 @@ final class SensitiveDataRedactorTest extends TestCase
         $redacted = SensitiveDataRedactor::redact($payload);
 
         $this->assertSame('[redacted]', $redacted['national_code']);
+        $this->assertSame('[redacted]', $redacted['nationalCode']);
         $this->assertSame('[redacted]', $redacted['individual_national_code']);
         $this->assertSame('[redacted]', $redacted['legal_national_code']);
         $this->assertSame('[redacted]', $redacted['fida_code']);
         $this->assertSame('[redacted]', $redacted['birthday']);
         $this->assertSame('[redacted]', $redacted['birth_date']);
+        $this->assertSame('[redacted]', $redacted['birthDate']);
+        $this->assertSame('[redacted]', $redacted['birthCertificateNumber']);
+        $this->assertSame('[redacted]', $redacted['identity_number']);
+        $this->assertSame('[redacted]', $redacted['identityNumber']);
         $this->assertSame('[redacted]', $redacted['postal_code']);
         $this->assertSame('[redacted]', $redacted['card']);
         $this->assertSame('[redacted]', $redacted['iban']);
@@ -262,12 +272,12 @@ final class SensitiveDataRedactorTest extends TestCase
 
     public function test_it_redacts_sensitive_json_like_body_text(): void
     {
-        $body = '{"token":"fake-token","apiKey":"fake-api-key","nested":{"email":"fake@example.test","pan":"fake-pan"}}';
+        $body = '{"token":"fake-token","apiKey":"fake-api-key","nationalCode":"fake-national-code","nested":{"email":"fake@example.test","pan":"fake-pan","identityNumber":"fake-identity-number"}}';
 
         $redacted = SensitiveDataRedactor::redactText($body);
 
         $this->assertSame(
-            '{"token":"[REDACTED]","apiKey":"[REDACTED]","nested":{"email":"[REDACTED]","pan":"[REDACTED]"}}',
+            '{"token":"[REDACTED]","apiKey":"[REDACTED]","nationalCode":"[REDACTED]","nested":{"email":"[REDACTED]","pan":"[REDACTED]","identityNumber":"[REDACTED]"}}',
             $redacted,
         );
     }

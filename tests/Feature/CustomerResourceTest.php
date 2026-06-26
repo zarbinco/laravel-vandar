@@ -166,6 +166,95 @@ final class CustomerResourceTest extends TestCase
             && $request['page'] === 1);
     }
 
+    public function test_authentication_kyc_posts_customer_scoped_json_payload(): void
+    {
+        Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
+
+        $response = Vandar::customers()->authenticationKyc('fake-customer-id', [
+            'national_code' => 'fake-national-code',
+            'birth_date' => 'fake-birth-date',
+        ]);
+
+        $this->assertInstanceOf(VandarResponse::class, $response);
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'POST'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/authentication/kyc'
+            && $request->hasHeader('Authorization', 'Bearer fake-access-token')
+            && $request->hasHeader('Content-Type', 'application/json')
+            && $request['national_code'] === 'fake-national-code'
+            && $request['birth_date'] === 'fake-birth-date');
+    }
+
+    public function test_authentication_shahkar_posts_customer_scoped_json_payload(): void
+    {
+        Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
+
+        Vandar::customers()->authenticationShahkar('fake-customer-id', [
+            'mobile' => 'fake-mobile',
+            'national_code' => 'fake-national-code',
+        ]);
+
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'POST'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/authentication/shahkar'
+            && $request->hasHeader('Authorization', 'Bearer fake-access-token')
+            && $request->hasHeader('Content-Type', 'application/json')
+            && $request['mobile'] === 'fake-mobile'
+            && $request['national_code'] === 'fake-national-code');
+    }
+
+    public function test_customer_scoped_v3_paths_encode_business_and_customer_segments(): void
+    {
+        Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
+
+        Vandar::customers()->authenticationKyc('customer/id with space', [
+            'national_code' => 'fake-national-code',
+        ], 'business/id with space');
+
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v3/business/business%2Fid%20with%20space/customers/customer%2Fid%20with%20space/authentication/kyc');
+    }
+
+    public function test_cash_in_code_gets_customer_scoped_code(): void
+    {
+        Http::fake(['https://api.vandar.io/*' => Http::response(['code' => 'fake-code'], 200)]);
+
+        $response = Vandar::customers()->cashInCode('fake-customer-id');
+
+        $this->assertInstanceOf(VandarResponse::class, $response);
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'GET'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/cash-in-code'
+            && $request->hasHeader('Authorization', 'Bearer fake-access-token'));
+    }
+
+    public function test_delete_cash_in_code_destroys_customer_scoped_code(): void
+    {
+        Http::fake(['https://api.vandar.io/*' => Http::response([], 204)]);
+
+        Vandar::customers()->deleteCashInCode('fake-customer-id');
+
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'DELETE'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/cash-in-code/destroy'
+            && $request->hasHeader('Authorization', 'Bearer fake-access-token'));
+    }
+
+    public function test_delete_cash_in_code_is_not_retried_automatically(): void
+    {
+        config()->set('vandar.rate_limit.max_retry_after_seconds', 0);
+
+        Http::fake([
+            'https://api.vandar.io/*' => Http::sequence()
+                ->push(['message' => 'Too many requests'], 429, ['Retry-After' => '0'])
+                ->push(['ok' => true], 200),
+        ]);
+
+        $response = Vandar::customers()->deleteCashInCode('fake-customer-id');
+
+        $this->assertTrue($response->tooManyRequests());
+        Http::assertSentCount(1);
+    }
+
     public function test_all_alias_calls_list_endpoint(): void
     {
         Http::fake(['https://api.vandar.io/*' => Http::response(['data' => []], 200)]);
@@ -206,6 +295,33 @@ final class CustomerResourceTest extends TestCase
                     && str_contains($encoded, '[redacted]')
                     && str_contains($encoded, 'normal')
                     && str_contains($encoded, 'yes');
+            });
+    }
+
+    public function test_customer_authentication_logging_redacts_identity_payload_and_customer_path(): void
+    {
+        config()->set('vandar.logging.enabled', true);
+        Log::spy();
+
+        Http::fake(['https://api.vandar.io/*' => Http::response(['ok' => true], 200)]);
+
+        Vandar::customers()->authenticationKyc('fake-customer-id', [
+            'nationalCode' => 'fake-national-code',
+            'birthDate' => 'fake-birth-date',
+        ]);
+
+        Log::shouldHaveReceived('debug')
+            ->once()
+            ->withArgs(function (string $message, array $context): bool {
+                $encoded = json_encode($context);
+
+                return $message === 'Vandar HTTP request'
+                    && is_string($encoded)
+                    && ($context['url'] ?? null) === 'https://api.vandar.io/v3/business/test-business/customers/[redacted]/authentication/kyc'
+                    && ! str_contains($encoded, 'fake-customer-id')
+                    && ! str_contains($encoded, 'fake-national-code')
+                    && ! str_contains($encoded, 'fake-birth-date')
+                    && str_contains($encoded, '[redacted]');
             });
     }
 }

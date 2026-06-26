@@ -47,6 +47,26 @@ $customer = Vandar::customers()->createIndividual([
 $found = Vandar::customers()->find('fake-customer-id');
 ```
 
+Customer authentication and customer cash-in-code endpoints are customer-scoped. Authentication services may require activation by Vandar support. The package sends the request and returns `VandarResponse`; your application decides how to store, trust, or act on the result.
+
+```php
+$kyc = Vandar::customers()->authenticationKyc('fake-customer-id', [
+    'national_code' => 'fake-national-code',
+    'birth_date' => 'fake-birth-date',
+]);
+
+$shahkar = Vandar::customers()->authenticationShahkar('fake-customer-id', [
+    'mobile' => 'fake-mobile',
+    'national_code' => 'fake-national-code',
+]);
+
+$customerCashInCode = Vandar::customers()->cashInCode('fake-customer-id');
+
+$deletedCustomerCashInCode = Vandar::customers()->deleteCashInCode('fake-customer-id');
+```
+
+Customer cash-in-code is different from business-level Avand cash-in code. Do not log sensitive identity payloads without redaction.
+
 ## Cards And IBANs
 
 ```php

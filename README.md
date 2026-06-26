@@ -14,6 +14,7 @@ This package is unofficial and is not affiliated with Vandar.
 - Access/refresh token management
 - Business APIs
 - Customers and customer custom fields
+- Customer authentication and customer cash-in-code APIs
 - Customer cards and IBANs
 - Inquiry APIs
 - IPG payment send, redirect URL, transaction, and verify helpers
@@ -340,8 +341,9 @@ Your Laravel application owns persistence, authorization, operational review, re
 
 Not yet implemented:
 
-- Direct debit
-- Ravand, card issuing, and banking resources
+- Subscription / Direct Debit planned as a future module
+- Ravand planned as a future module
+- Card issuing and banking resources
 - Optional encrypted database token store
 - Additional typed response DTOs if needed
 

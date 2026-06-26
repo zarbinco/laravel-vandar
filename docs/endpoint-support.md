@@ -48,10 +48,10 @@ Statuses:
 | Customer wallet | `POST /v2/business/:business/customers/:customer/wallet/deposit` | `CustomerResource::walletDeposit()` | supported | Unsafe request is not retried automatically unless explicit rate-limit opt-in is enabled. |
 | Customer wallet | `POST /v2/business/:business/customers/:customer/wallet/withdraw` | `CustomerResource::walletWithdraw()` | supported | Unsafe request is not retried automatically unless explicit rate-limit opt-in is enabled. |
 | Customer transactions | `POST /v2/business/:business/customers/:customer/transactions` | `CustomerResource::transactions()` | supported |  |
-| Customer authentication | `POST /v3/business/:business/customers/:customer/authentication/kyc` | none | not implemented | Customer-specific authentication endpoints are not available as named methods. |
-| Customer authentication | `POST /v3/business/:business/customers/:customer/authentication/shahkar` | none | not implemented | Use inquiry resources only for the implemented inquiry endpoints below. |
-| Customer cash-in code | `GET /v3/business/:business/customers/:customer/cash-in-code` | none | not implemented | Business-level cash-in code is implemented under `AvandResource::code()`. |
-| Customer cash-in code | `DELETE /v3/business/:business/customers/:customer/cash-in-code/destroy` | none | not implemented |  |
+| Customer authentication | `POST /v3/business/:business/customers/:customer/authentication/kyc` | `CustomerResource::authenticationKyc()` | supported | Customer authentication requires activation from Vandar support according to the official docs. |
+| Customer authentication | `POST /v3/business/:business/customers/:customer/authentication/shahkar` | `CustomerResource::authenticationShahkar()` | supported | Customer-specific authentication endpoints are separate from the generic inquiry endpoints below. |
+| Customer cash-in code | `GET /v3/business/:business/customers/:customer/cash-in-code` | `CustomerResource::cashInCode()` | supported | Customer cash-in-code is customer-scoped and different from business-level `AvandResource::code()` / `cashInCode()`. |
+| Customer cash-in code | `DELETE /v3/business/:business/customers/:customer/cash-in-code/destroy` | `CustomerResource::deleteCashInCode()` | supported | Unsafe request is not retried automatically. |
 | Customer cards | `POST /v3/business/:business/customers/:customer/cards` | `CardResource::create()` | supported | Customer card endpoints are documented by Vandar and covered by package contract tests. |
 | Customer cards | `GET /v3/business/:business/customers/:customer/cards` | `CardResource::list()` | supported |  |
 | Customer cards | `DELETE /v3/business/:business/customers/:customer/cards/:card` | `CardResource::delete()` | supported |  |
