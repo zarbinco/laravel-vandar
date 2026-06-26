@@ -19,6 +19,8 @@ Refresh tokens are especially sensitive because they can be exchanged for new ac
 
 In multi-server production deployments, use a shared cache such as Redis for the cache token store so refreshed tokens and refresh locks are shared across workers.
 
+Do not use file cache as the token store across multiple servers. File cache is local to each server and cannot coordinate token refresh locks between workers on different hosts.
+
 ## Raw response bodies
 
 `VandarResponse::body()` returns the raw upstream body. It is useful for debugging malformed JSON, HTML error pages, or unexpected upstream responses, but it may contain private customer, bank, payment, settlement, or direct debit data.
@@ -72,6 +74,8 @@ Card numbers, card hashes, CIDs, IBANs, account numbers, reference numbers, and 
 Subscription / Direct Debit payloads can include bank, account, authorization, withdrawal, refund, track, and customer identifiers. Store them safely and do not log raw authorization tokens, withdrawal IDs, refund IDs, account numbers, IBANs, card numbers, national codes, or mobile numbers.
 
 Money-moving direct debit withdrawal and refund calls are not retried automatically by default. Only enable money-moving retries when your application has idempotency and reconciliation controls.
+
+Treat timeouts and unknown responses from money-moving requests as unknown state. Reconcile local records with Vandar before repeating payment verification, refund, settlement, withdrawal, deposit, or suspicious-payment resolution requests.
 
 ## SSL verification
 

@@ -58,6 +58,20 @@ final class DocumentationConsistencyTest extends TestCase
         $this->assertStringContainsString('parsed JSON and headers may still contain sensitive values', $docs);
     }
 
+    public function test_production_docs_include_token_cache_and_uncertain_money_moving_guidance(): void
+    {
+        $docs = implode("\n", [
+            $this->readProjectFile('docs/security.md'),
+            $this->readProjectFile('docs/usage.md'),
+            $this->readProjectFile('docs/production-checklist.md'),
+        ]);
+
+        $this->assertStringContainsString('shared cache such as Redis', $docs);
+        $this->assertStringContainsString('Do not use file cache as the token store across multiple servers', $docs);
+        $this->assertStringContainsString('Treat timeouts and unknown responses from money-moving requests as unknown state', $docs);
+        $this->assertStringContainsString('Keep `VANDAR_HTTP_VERIFY_SSL=true`', $docs);
+    }
+
     private function readProjectFile(string $path): string
     {
         return (string) file_get_contents($this->projectPath($path));

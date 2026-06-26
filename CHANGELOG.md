@@ -19,6 +19,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Added Larastan/PHPStan static analysis and CI quality gates.
 - Added upgrade, production, and release checklist documentation.
 - Added focused IPG callback safety tests for verify failures, unverified responses, mismatch risks, duplicate callbacks, deprecated status checks, and malformed verify responses.
+- Added focused token refresh, cache token store, HTTP retry, timeout, and unsafe money-moving retry tests.
 
 ### Changed
 
@@ -26,6 +27,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Improved package documentation, security guidance, and contribution workflow.
 - Clarified the SDK/client boundary, application-owned payment records, callback verification, idempotency, reconciliation, logging policy, and multi-server token cache guidance.
 - Clarified IPG callback controller guidance for application-owned verification, matching, idempotency, and duplicate callback handling.
+- Clarified production token cache guidance, file-cache multi-server risk, and unknown-state handling for timed-out money-moving requests.
 - Corrected roadmap documentation to list Subscription / Direct Debit as available and keep Ravand as future work.
 - Updated testing documentation for Subscription / Direct Debit fake labels.
 - Allowed package HTTP fakes to return raw string bodies for malformed response tests.

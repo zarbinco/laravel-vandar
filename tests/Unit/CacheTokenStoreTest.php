@@ -41,6 +41,22 @@ final class CacheTokenStoreTest extends TestCase
         $this->assertSame('fake-cache-refresh-token', $store->refreshToken());
     }
 
+    public function test_it_uses_the_configured_cache_key_without_touching_other_keys(): void
+    {
+        config()->set('vandar.tokens.cache_key', 'tenant-a:vandar:tokens');
+        Cache::put('tenant-b:vandar:tokens', [
+            'token_type' => 'Bearer',
+            'access_token' => 'fake-other-access-token',
+            'refresh_token' => 'fake-other-refresh-token',
+        ]);
+
+        $this->app->make(CacheTokenStore::class)
+            ->save(new TokenSet('Bearer', 'fake-tenant-access-token', 'fake-tenant-refresh-token'));
+
+        $this->assertSame('fake-tenant-access-token', $this->app->make(CacheTokenStore::class)->accessToken());
+        $this->assertSame('fake-other-access-token', Cache::get('tenant-b:vandar:tokens')['access_token'] ?? null);
+    }
+
     public function test_clear_removes_cached_tokens(): void
     {
         config()->set('vandar.tokens.access_token', null);

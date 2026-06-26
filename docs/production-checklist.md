@@ -9,7 +9,6 @@ Use this checklist when integrating the package into a production Laravel applic
 - Define an application logging policy for Vandar payloads, identifiers, and exceptions
 - Use `redactedBody()` instead of raw response bodies in diagnostics
 - Do not log `$response->toArray()` directly unless parsed JSON and headers have been redacted
-- Use `$response->redactedBody()` for raw body diagnostics
 - Rely on package-redacted exception context instead of raw response arrays
 - Never trust an IPG callback alone
 - Verify the callback token with `verifyCallback()` before marking anything as paid
@@ -23,5 +22,7 @@ Use this checklist when integrating the package into a production Laravel applic
 - Respect Vandar rate limits and queue high-volume work
 - Protect API keys, access tokens, refresh tokens, and authorization headers
 - Use a shared cache such as Redis for `VANDAR_TOKEN_STORE=cache` in multi-server deployments
+- Do not use file cache as the token store across multiple servers
+- Treat timeouts and unknown responses from money-moving requests as unknown state before repeating them
 - Avoid logging national code, mobile, IBAN, card, token, authorization, withdrawal, refund, transaction, settlement, and cash-in identifiers
 - Keep config cached in production after environment changes

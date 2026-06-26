@@ -37,6 +37,8 @@ Token refresh is lock-protected to reduce duplicate refresh calls when many requ
 
 In multi-server production deployments, back the `cache` token store with a shared cache such as Redis so refreshed tokens and locks are visible to every worker.
 
+Do not use file cache as the token store across multiple servers. Each server would have its own local token state and refresh locks, which can cause stale tokens or duplicate refresh attempts.
+
 ## API Resources
 
 Available resource entry points:
@@ -315,6 +317,8 @@ if ($response->rateLimited()) {
 ```
 
 Applications should implement queue throttling and idempotency for high-volume or financial workflows. A retried financial operation is only safe when your application provides the idempotency guarantees.
+
+Treat timeouts and unknown responses from money-moving requests as unknown state. Reconcile local records with Vandar before repeating refunds, settlements, withdrawals, deposits, or payment verification calls.
 
 ## Testing With Fakes
 
