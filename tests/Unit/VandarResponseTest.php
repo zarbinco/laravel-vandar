@@ -44,6 +44,61 @@ final class VandarResponseTest extends TestCase
         ]))->errors());
     }
 
+    public function test_value_helper_uses_dot_notation(): void
+    {
+        $response = new VandarResponse(200, [
+            'data' => [
+                'transaction' => [
+                    'id' => 'fake-transaction-id',
+                ],
+            ],
+        ]);
+
+        $this->assertSame('fake-transaction-id', $response->value('data.transaction.id'));
+        $this->assertSame('fallback', $response->value('data.missing', 'fallback'));
+    }
+
+    public function test_value_helper_uses_fallback_key_list(): void
+    {
+        $response = new VandarResponse(200, [
+            'data' => [
+                'payment_status' => 'OK',
+            ],
+        ]);
+
+        $this->assertSame('OK', $response->value(['payment_status', 'data.payment_status']));
+        $this->assertSame('fallback', $response->value(['missing', 'data.missing'], 'fallback'));
+    }
+
+    public function test_string_int_and_bool_helpers_convert_scalar_values(): void
+    {
+        $response = new VandarResponse(200, [
+            'string_value' => 123,
+            'int_value' => '100000',
+            'bool_true' => 'true',
+            'bool_false' => 0,
+        ]);
+
+        $this->assertSame('123', $response->string('string_value'));
+        $this->assertSame(100000, $response->int('int_value'));
+        $this->assertTrue($response->bool('bool_true'));
+        $this->assertFalse($response->bool('bool_false'));
+    }
+
+    public function test_scalar_helpers_return_defaults_for_invalid_values(): void
+    {
+        $response = new VandarResponse(200, [
+            'array_value' => ['nested' => true],
+            'invalid_int' => 'not-a-number',
+            'invalid_bool' => 'not-a-bool',
+        ]);
+
+        $this->assertSame('fallback', $response->scalar('array_value', 'fallback'));
+        $this->assertSame('fallback', $response->string('array_value', 'fallback'));
+        $this->assertSame(5, $response->int('invalid_int', 5));
+        $this->assertTrue($response->bool('invalid_bool', true));
+    }
+
     /**
      * @param  class-string<\Throwable>  $exception
      */

@@ -6,8 +6,10 @@ namespace Zarbinco\LaravelVandar\Resources;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Request;
+use Zarbinco\LaravelVandar\DTO\IpgCallbackVerificationResult;
 use Zarbinco\LaravelVandar\DTO\VandarResponse;
 use Zarbinco\LaravelVandar\Exceptions\VandarException;
+use Zarbinco\LaravelVandar\Exceptions\VandarIpgCallbackException;
 use Zarbinco\LaravelVandar\Http\VandarClient;
 use Zarbinco\LaravelVandar\Support\IpgApiKeyResolver;
 use Zarbinco\LaravelVandar\Support\VandarPath;
@@ -71,9 +73,42 @@ final class IpgResource
     /**
      * @param  array<string, mixed>|Request  $source
      */
-    public function callbackSucceeded(array|Request $source): bool
+    public function verifyCallback(array|Request $source, ?string $apiKey = null): IpgCallbackVerificationResult
+    {
+        $token = $this->callbackToken($source);
+
+        if ($token === null) {
+            throw new VandarIpgCallbackException('Vandar IPG callback token is missing.');
+        }
+
+        return new IpgCallbackVerificationResult(
+            token: $token,
+            callbackStatus: $this->callbackStatus($source),
+            response: $this->verify($token, $apiKey),
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>|Request  $source
+     */
+    public function callbackHasOkStatus(array|Request $source): bool
     {
         return $this->callbackStatus($source) === 'OK';
+    }
+
+    /**
+     * This method only checks the callback payment_status field. It does not
+     * verify the payment. Applications must call verify() or verifyCallback()
+     * before marking an order or invoice as paid. Use callbackHasOkStatus()
+     * for raw callback status checks.
+     *
+     * @deprecated Use callbackHasOkStatus() for callback status checks and verifyCallback() for safe callback verification.
+     *
+     * @param  array<string, mixed>|Request  $source
+     */
+    public function callbackSucceeded(array|Request $source): bool
+    {
+        return $this->callbackHasOkStatus($source);
     }
 
     /**

@@ -50,6 +50,106 @@ final class VandarResponse
         return is_array($data) ? Arr::get($data, $key, $default) : $default;
     }
 
+    /**
+     * @param  array<int, string>|string  $keys
+     */
+    public function value(array|string $keys, mixed $default = null): mixed
+    {
+        foreach ($this->keyList($keys) as $key) {
+            if (Arr::has($this->json, $key)) {
+                return Arr::get($this->json, $key);
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param  array<int, string>|string  $keys
+     */
+    public function scalar(array|string $keys, mixed $default = null): mixed
+    {
+        foreach ($this->keyList($keys) as $key) {
+            if (! Arr::has($this->json, $key)) {
+                continue;
+            }
+
+            $value = Arr::get($this->json, $key);
+
+            if (is_scalar($value)) {
+                return $value;
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param  array<int, string>|string  $keys
+     */
+    public function string(array|string $keys, ?string $default = null): ?string
+    {
+        $value = $this->scalar($keys, $default);
+
+        return is_scalar($value) ? (string) $value : $default;
+    }
+
+    /**
+     * @param  array<int, string>|string  $keys
+     */
+    public function int(array|string $keys, ?int $default = null): ?int
+    {
+        foreach ($this->keyList($keys) as $key) {
+            if (! Arr::has($this->json, $key)) {
+                continue;
+            }
+
+            $value = Arr::get($this->json, $key);
+
+            if (is_int($value)) {
+                return $value;
+            }
+
+            if ((is_float($value) || is_string($value)) && is_numeric($value)) {
+                return (int) $value;
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param  array<int, string>|string  $keys
+     */
+    public function bool(array|string $keys, ?bool $default = null): ?bool
+    {
+        foreach ($this->keyList($keys) as $key) {
+            if (! Arr::has($this->json, $key)) {
+                continue;
+            }
+
+            $value = Arr::get($this->json, $key);
+
+            if (is_bool($value)) {
+                return $value;
+            }
+
+            if (is_int($value) && in_array($value, [0, 1], true)) {
+                return $value === 1;
+            }
+
+            if (is_string($value)) {
+                $boolean = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+                if (is_bool($boolean)) {
+                    return $boolean;
+                }
+            }
+        }
+
+        return $default;
+    }
+
     public function message(?string $default = null): ?string
     {
         foreach (['message', 'error', 'error_message'] as $key) {
@@ -182,5 +282,14 @@ final class VandarResponse
             'json' => $this->json,
             'headers' => $this->headers,
         ];
+    }
+
+    /**
+     * @param  array<int, string>|string  $keys
+     * @return array<int, string>
+     */
+    private function keyList(array|string $keys): array
+    {
+        return is_array($keys) ? array_values($keys) : [$keys];
     }
 }

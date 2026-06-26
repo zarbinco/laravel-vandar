@@ -77,6 +77,37 @@ $refund = Vandar::refunds()->create('fake-transaction-id', [
 ]);
 ```
 
+IPG callback status is only callback status. It is not final payment success, and this package does not mark invoices or orders as paid.
+
+Wrong pattern:
+
+```php
+if (Vandar::ipg()->callbackSucceeded($request)) {
+    // Do not mark as paid here.
+}
+```
+
+Correct pattern:
+
+```php
+$result = Vandar::ipg()->verifyCallback($request);
+
+if (! $result->verified()) {
+    // Keep invoice pending/failed.
+}
+
+$response = $result->response();
+$transactionId = $result->transactionId();
+$amount = $result->amount();
+$factorNumber = $result->factorNumber();
+
+// Application must still compare expected invoice/order amount,
+// factor number/order id, token, and transaction id,
+// then update payment idempotently.
+```
+
+Your application must call verify after the callback and must handle idempotency, amount matching, invoice/order matching, transaction/token comparison, persistence, and reconciliation.
+
 ## Settlements
 
 ```php

@@ -137,6 +137,37 @@ $redirectUrl = Vandar::ipg()->redirectUrl('fake-payment-token');
 $verified = Vandar::ipg()->verify('fake-payment-token');
 ```
 
+IPG callback status is not final payment success. A callback can report `payment_status=OK`, but your application must still verify the payment before marking any invoice or order as paid. This package does not persist payment state or mark invoices/orders as paid for you.
+
+Wrong pattern:
+
+```php
+if (Vandar::ipg()->callbackSucceeded($request)) {
+    // Do not mark as paid here.
+}
+```
+
+Correct pattern:
+
+```php
+$result = Vandar::ipg()->verifyCallback($request);
+
+if (! $result->verified()) {
+    // Keep invoice pending/failed.
+}
+
+$response = $result->response();
+$transactionId = $result->transactionId();
+$amount = $result->amount();
+$factorNumber = $result->factorNumber();
+
+// Application must still compare expected invoice/order amount,
+// factor number/order id, token, and transaction id,
+// then update payment idempotently.
+```
+
+Use `callbackHasOkStatus()` when you only need to inspect the raw callback status. Use `verifyCallback()` or `verify()` before any paid-state transition. Your application owns idempotency, amount matching, invoice/order matching, transaction/token comparison, persistence, and reconciliation.
+
 ### Refunds
 
 ```php

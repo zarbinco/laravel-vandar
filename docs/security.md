@@ -10,11 +10,13 @@ Packagist and GitHub tokens used for package auto-update are maintainer secrets.
 
 ## Private Data
 
-Customer identity, card, IBAN, mobile, postal, inquiry image, company signature, statement, settlement, cash-in, batch, and refund data are sensitive. Use fake placeholder values in tests and issue reports.
+Customer identity, card, IBAN, mobile, postal, inquiry image, company signature, statement, settlement, cash-in, batch, refund, IPG callback, and verify response data are sensitive. Use fake placeholder values in tests and issue reports.
 
 ## Logging
 
 Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, and dynamic path values. Your application logs, APM tools, queue payloads, audit logs, and exception reporters still need their own redaction policies.
+
+IPG callback payloads and verify responses can include payment tokens, transaction identifiers, card hashes, CID values, amounts, and other payment data. Log them only after redaction.
 
 ## Money-Moving Requests
 
