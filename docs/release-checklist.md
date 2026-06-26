@@ -4,14 +4,15 @@ Use this checklist before tagging a package release.
 
 ## Before tagging
 
+- Run `composer ci`
 - Run `composer validate --strict`
 - Run `composer format:test`
 - Run `composer analyse`
 - Run `composer test`
-- Run `composer audit:release`
+- Run `composer release:audit`
 - Confirm no `composer.lock` is included in the release archive
 - Confirm no `vendor/` directory is included
-- Confirm no `REVIEW_NOTES.md` file is present
+- Confirm `REVIEW_NOTES.md` is not tracked or included in the release archive
 - Confirm no real credentials are present
 - Confirm `docs/endpoint-support.md` is current
 - Confirm `CHANGELOG.md` has release notes

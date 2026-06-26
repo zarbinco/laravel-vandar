@@ -6,8 +6,7 @@ Thanks for helping improve Laravel Vandar SDK.
 
 ```bash
 composer install
-composer test
-composer format:test
+composer ci
 ```
 
 Use `vendor/bin/pint` to apply formatting fixes.
@@ -17,14 +16,10 @@ Use `vendor/bin/pint` to apply formatting fixes.
 Before opening a pull request, run:
 
 ```bash
-composer validate --strict
-composer format:test
-composer analyse
-composer test
-composer audit:release
+composer ci
 ```
 
-`composer format:test` and `composer analyse` are CI quality gates. The GitHub lowest-dependency job focuses on runtime/test compatibility and may skip dev-tool-only checks such as formatting and static analysis.
+`composer ci` runs strict Composer validation, Pint format checks, PHPStan/Larastan, PHPUnit, and the release audit. The GitHub lowest-dependency job focuses on runtime/test compatibility and skips dev-tool-only checks such as formatting and static analysis.
 
 ## Pull Requests
 
@@ -40,9 +35,5 @@ composer audit:release
 Before opening a release-oriented pull request, run:
 
 ```bash
-composer validate --strict
-composer format:test
-composer analyse
-composer test
-composer audit:release
+composer ci
 ```

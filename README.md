@@ -243,12 +243,10 @@ See [docs/security.md](docs/security.md), [docs/production-checklist.md](docs/pr
 ## Quality Checks
 
 ```bash
-composer validate --strict
-composer format:test
-composer analyse
-composer test
-composer audit:release
+composer ci
 ```
+
+`composer ci` runs strict Composer validation, Pint format checks, PHPStan/Larastan analysis, PHPUnit tests, and the release audit. Individual commands such as `composer format:test`, `composer analyse`, `composer test`, and `composer release:audit` remain available for focused local checks.
 
 ## Versioning
 

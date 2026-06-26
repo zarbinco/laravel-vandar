@@ -64,17 +64,22 @@
         }
     },
     "scripts": {
+        "validate:strict": "composer validate --strict",
         "test": "vendor/bin/phpunit",
         "format": "vendor/bin/pint",
+        "pint": "@format",
         "format:test": "vendor/bin/pint --test",
+        "pint:test": "@format:test",
         "analyse": "phpstan analyse --memory-limit=1G",
         "phpstan": "@analyse",
         "audit:release": "php scripts/audit-release.php",
+        "release:audit": "@audit:release",
         "ci": [
+            "@validate:strict",
             "@format:test",
             "@analyse",
             "@test",
-            "@audit:release"
+            "@release:audit"
         ]
     },
     "minimum-stability": "stable",

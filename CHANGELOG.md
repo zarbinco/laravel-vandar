@@ -36,6 +36,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Polished package documentation and release readiness checks.
 - Clarified safe logging documentation for `VandarResponse::toArray()`, `redactedBody()`, and redacted exception context.
 - Raised the minimum Laravel Pint dev-tool version and adjusted lowest-dependency CI quality gates.
+- Hardened the local and GitHub Actions quality gate around strict Composer validation, Pint, PHPStan/Larastan, PHPUnit, release audit, stable PHP matrix coverage, and lowest-dependency compatibility checks.
 
 ### Security
 

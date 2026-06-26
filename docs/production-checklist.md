@@ -28,3 +28,4 @@ Use this checklist when integrating the package into a production Laravel applic
 - Treat timeouts and unknown responses from money-moving requests as unknown state before repeating them
 - Avoid logging national code, mobile, IBAN, card, token, authorization, withdrawal, refund, transaction, settlement, and cash-in identifiers
 - Keep config cached in production after environment changes
+- Before tagging or deploying a package update, confirm the GitHub Actions quality gate or local `composer ci` has passed

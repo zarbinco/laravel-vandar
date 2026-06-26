@@ -57,11 +57,15 @@ foreach ([
 }
 
 $internalNotesFile = 'REVIEW'.'_NOTES.md';
-is_file($path($internalNotesFile))
-    ? $fail('internal review artifact is absent')
-    : $pass('internal review artifact is absent');
-
 $trackedFiles = trackedFiles($root);
+
+in_array($internalNotesFile, $trackedFiles, true)
+    ? $fail('internal review artifact is not tracked')
+    : $pass('internal review artifact is not tracked');
+
+if (is_file($path($internalNotesFile))) {
+    $warn('REVIEW_NOTES.md exists locally; it is allowed as an untracked maintainer note and export-ignored from release archives');
+}
 
 if ($trackedFiles !== []) {
     foreach ($trackedFiles as $trackedFile) {
@@ -259,6 +263,7 @@ function scanFiles(string $root, array $roots): array
 {
     $files = [];
     $excludedDirectories = ['.git', 'vendor', 'node_modules', 'coverage', 'build', '.phpunit.cache', '.idea', '.vscode'];
+    $excludedFiles = ['REVIEW_NOTES.md', 'composer.lock', '.phpunit.result.cache'];
 
     foreach ($roots as $scanRoot) {
         $absolute = $root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $scanRoot);
@@ -289,7 +294,7 @@ function scanFiles(string $root, array $roots): array
                 continue;
             }
 
-            if (str_ends_with($relative, '.zip') || $relative === 'composer.lock') {
+            if (str_ends_with($relative, '.zip') || in_array($relative, $excludedFiles, true)) {
                 continue;
             }
 

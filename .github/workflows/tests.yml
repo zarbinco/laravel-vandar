@@ -5,27 +5,15 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  quality:
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - php: '8.2'
-            dependencies: lowest
-            composer-options: --prefer-lowest --prefer-stable
-          - php: '8.2'
-            dependencies: stable
-            composer-options: --prefer-stable
-          - php: '8.3'
-            dependencies: stable
-            composer-options: --prefer-stable
-          - php: '8.4'
-            dependencies: stable
-            composer-options: --prefer-stable
+        php: ['8.2', '8.3', '8.4']
 
-    name: PHP ${{ matrix.php }} / ${{ matrix.dependencies }}
+    name: PHP ${{ matrix.php }} / stable quality gate
 
     steps:
       - name: Checkout
@@ -42,27 +30,50 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.composer/cache/files
-          key: ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.dependencies }}-composer-${{ hashFiles('composer.json') }}
+          key: ${{ runner.os }}-php-${{ matrix.php }}-stable-composer-${{ hashFiles('composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.dependencies }}-composer-
+            ${{ runner.os }}-php-${{ matrix.php }}-stable-composer-
             ${{ runner.os }}-php-${{ matrix.php }}-composer-
+
+      - name: Install Dependencies
+        run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+
+      - name: Run Quality Gate
+        run: composer ci
+
+  lowest-dependencies:
+    runs-on: ubuntu-latest
+
+    name: PHP 8.2 / lowest dependencies
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-php-8.2-lowest-composer-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-php-8.2-lowest-composer-
+            ${{ runner.os }}-php-8.2-composer-
 
       - name: Validate Composer
         run: composer validate --strict
 
-      - name: Install Dependencies
-        run: composer update ${{ matrix.composer-options }} --prefer-dist --no-interaction --no-progress
-
-      - name: Run Pint
-        if: matrix.dependencies != 'lowest'
-        run: composer format:test
-
-      - name: Run Static Analysis
-        if: matrix.dependencies != 'lowest'
-        run: composer analyse
+      - name: Install Lowest Dependencies
+        run: composer update --prefer-lowest --prefer-stable --prefer-dist --no-interaction --no-progress
 
       - name: Run Tests
         run: composer test
 
       - name: Run Release Audit
-        run: composer audit:release
+        run: composer release:audit
