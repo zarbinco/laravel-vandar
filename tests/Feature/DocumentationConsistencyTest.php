@@ -17,6 +17,7 @@ final class DocumentationConsistencyTest extends TestCase
         $this->assertStringContainsString('verifyCallback()', $readme);
         $this->assertStringContainsString('callbackHasOkStatus()', $readme);
         $this->assertStringContainsString('does not create application payment workflows', $readme);
+        $this->assertStringContainsString('docs/laravel-payment-integration.md', $readme);
         $this->assertStringContainsString('VANDAR_RETRY_MONEY_MOVING_REQUESTS=false', $readme);
 
         preg_match('/## Features(?P<features>.*?)## Requirements/s', $readme, $matches);
@@ -29,6 +30,7 @@ final class DocumentationConsistencyTest extends TestCase
         $this->assertFileExists($this->projectPath('UPGRADE.md'));
         $this->assertFileExists($this->projectPath('docs/release-checklist.md'));
         $this->assertFileExists($this->projectPath('docs/production-checklist.md'));
+        $this->assertFileExists($this->projectPath('docs/laravel-payment-integration.md'));
     }
 
     public function test_endpoint_support_keeps_ravand_as_future_work(): void
@@ -64,12 +66,27 @@ final class DocumentationConsistencyTest extends TestCase
             $this->readProjectFile('docs/security.md'),
             $this->readProjectFile('docs/usage.md'),
             $this->readProjectFile('docs/production-checklist.md'),
+            $this->readProjectFile('docs/laravel-payment-integration.md'),
         ]);
 
         $this->assertStringContainsString('shared cache such as Redis', $docs);
         $this->assertStringContainsString('Do not use file cache as the token store across multiple servers', $docs);
         $this->assertStringContainsString('Treat timeouts and unknown responses from money-moving requests as unknown state', $docs);
         $this->assertStringContainsString('Keep `VANDAR_HTTP_VERIFY_SSL=true`', $docs);
+    }
+
+    public function test_laravel_payment_integration_example_keeps_sdk_boundary_visible(): void
+    {
+        $docs = $this->readProjectFile('docs/laravel-payment-integration.md');
+
+        $this->assertStringContainsString('Create a local payment record before redirecting the user', $docs);
+        $this->assertStringContainsString('Do not mark invoices, orders, or wallets as paid from callback status alone', $docs);
+        $this->assertStringContainsString('verifyCallback()', $docs);
+        $this->assertStringContainsString('normalizeAmount', $docs);
+        $this->assertStringContainsString('lockForUpdate()', $docs);
+        $this->assertStringContainsString('redactedBody()', $docs);
+        $this->assertStringContainsString('It does not create payment tables', $docs);
+        $this->assertStringContainsString('Using file cache for token storage in multi-server production', $docs);
     }
 
     private function readProjectFile(string $path): string

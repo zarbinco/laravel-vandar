@@ -198,7 +198,7 @@ Vandar::directDebit()
 
 Subscription / Direct Debit services may require merchant or account activation on Vandar's side. The package exposes the client methods only; your application still stores mandates, authorization IDs, withdrawals, refunds, and reconciliation state.
 
-See [docs/usage.md](docs/usage.md) for examples and [docs/endpoint-support.md](docs/endpoint-support.md) for the endpoint support matrix. Ravand is not implemented and remains future work.
+See [docs/usage.md](docs/usage.md) for SDK examples, [docs/laravel-payment-integration.md](docs/laravel-payment-integration.md) for an application-side Laravel payment flow, and [docs/endpoint-support.md](docs/endpoint-support.md) for the endpoint support matrix. Ravand is not implemented and remains future work.
 
 ## Testing With Fakes
 
@@ -238,7 +238,7 @@ Package logging is disabled by default. When enabled, request and response summa
 
 SSL verification defaults to true and should not be disabled in production.
 
-See [docs/security.md](docs/security.md), [docs/production-checklist.md](docs/production-checklist.md), and [SECURITY.md](SECURITY.md).
+See [docs/security.md](docs/security.md), [docs/production-checklist.md](docs/production-checklist.md), [docs/laravel-payment-integration.md](docs/laravel-payment-integration.md), and [SECURITY.md](SECURITY.md).
 
 ## Quality Checks
 

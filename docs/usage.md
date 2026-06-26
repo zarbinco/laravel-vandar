@@ -193,6 +193,8 @@ $factorNumber = $result->factorNumber();
 
 Your application must call verify after the callback and must handle idempotency, amount matching, invoice/order matching, transaction/token comparison, persistence, and reconciliation.
 
+For a fuller application-side example with a local payments table and controller skeleton, see [laravel-payment-integration.md](laravel-payment-integration.md).
+
 ### Safe callback controller skeleton
 
 This skeleton keeps the SDK boundary visible: verify before marking anything paid. The SDK returns Vandar responses only; the DB transaction belongs to your application.

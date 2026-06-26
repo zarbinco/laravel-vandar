@@ -45,6 +45,8 @@ Fake responses are converted into normal SDK responses, so application tests can
 
 Fakes only replace HTTP calls. Application tests should still assert callback verification, idempotency, amount/order matching, local record updates, reconciliation behavior, and safe logging decisions.
 
+For a production-oriented application flow to adapt in your own tests, see [laravel-payment-integration.md](laravel-payment-integration.md).
+
 ## Local Quality Gate
 
 Run the same quality gate used by the stable GitHub Actions jobs:

@@ -20,6 +20,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Added upgrade, production, and release checklist documentation.
 - Added focused IPG callback safety tests for verify failures, unverified responses, mismatch risks, duplicate callbacks, deprecated status checks, and malformed verify responses.
 - Added focused token refresh, cache token store, HTTP retry, timeout, and unsafe money-moving retry tests.
+- Added a production-oriented Laravel payment integration example for safe application-side IPG usage.
 
 ### Changed
 

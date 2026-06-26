@@ -2,6 +2,7 @@
 
 Use this checklist when integrating the package into a production Laravel application.
 
+- Review the application-side example in [laravel-payment-integration.md](laravel-payment-integration.md)
 - Treat the package as an SDK/client, not a payment workflow or source of truth
 - Keep application-side payment, invoice, wallet, order, ledger, and reconciliation records
 - Keep `VANDAR_HTTP_VERIFY_SSL=true`
