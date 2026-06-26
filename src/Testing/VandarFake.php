@@ -29,6 +29,15 @@ final class VandarFake
         'queued-settlements.create' => ['method' => 'POST', 'base' => 'api', 'path' => '/v3/business/*/settlement/queued'],
         'batch-settlements.create' => ['method' => 'POST', 'base' => 'batch', 'path' => '/api/v2/business/*/batches-settlement'],
         'avand.balance' => ['method' => 'POST', 'base' => 'api', 'path' => '/v3/business/*/cash-in/account/balance'],
+        'subscriptions.banks' => ['method' => 'GET', 'base' => 'api', 'path' => '/v3/business/*/subscription/banks/actives'],
+        'subscriptions.authorization.create' => ['method' => 'POST', 'base' => 'api', 'path' => '/v3/business/*/subscription/authorization/store'],
+        'subscriptions.authorization.verify' => ['method' => 'PATCH', 'base' => 'api', 'path' => '/v3/business/*/subscription/authorization/*/verify'],
+        'subscriptions.authorization.delete' => ['method' => 'DELETE', 'base' => 'api', 'path' => '/v3/business/*/subscription/authorization/*'],
+        'subscriptions.withdrawal.create' => ['method' => 'POST', 'base' => 'api', 'path' => '/v3/business/*/subscription/withdrawal/store'],
+        'subscriptions.withdrawal.find' => ['method' => 'GET', 'base' => 'api', 'path' => '/v3/business/*/subscription/withdrawal/*'],
+        'subscriptions.withdrawal.track' => ['method' => 'GET', 'base' => 'api', 'path' => '/v3/business/*/subscription/withdrawal/track-id/*'],
+        'subscriptions.refunds.create' => ['method' => 'POST', 'base' => 'api', 'path' => '/v3/business/*/subscription/refunds'],
+        'subscriptions.refunds.find' => ['method' => 'GET', 'base' => 'api', 'path' => '/v3/business/*/subscription/refunds/*'],
     ];
 
     /**

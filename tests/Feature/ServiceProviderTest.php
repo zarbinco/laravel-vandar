@@ -21,6 +21,7 @@ use Zarbinco\LaravelVandar\Resources\QueuedSettlementResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Resources\RefundResource;
 use Zarbinco\LaravelVandar\Resources\SettlementResource;
+use Zarbinco\LaravelVandar\Resources\SubscriptionResource;
 use Zarbinco\LaravelVandar\Support\IpgApiKeyResolver;
 use Zarbinco\LaravelVandar\Tests\TestCase;
 use Zarbinco\LaravelVandar\Token\TokenManager;
@@ -98,5 +99,13 @@ final class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(BatchSettlementResource::class, Vandar::batchSettlements());
         $this->assertInstanceOf(AvandResource::class, Vandar::avand());
         $this->assertInstanceOf(AvandResource::class, Vandar::cashIn());
+    }
+
+    public function test_it_registers_subscription_services(): void
+    {
+        $this->assertInstanceOf(SubscriptionResource::class, $this->app->make(SubscriptionResource::class));
+        $this->assertInstanceOf(SubscriptionResource::class, Vandar::subscriptions());
+        $this->assertInstanceOf(SubscriptionResource::class, Vandar::subscription());
+        $this->assertInstanceOf(SubscriptionResource::class, Vandar::directDebit());
     }
 }

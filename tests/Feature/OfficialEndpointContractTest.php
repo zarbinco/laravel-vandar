@@ -22,6 +22,7 @@ final class OfficialEndpointContractTest extends TestCase
         config()->set('vandar.tokens.refresh_token', 'fake-refresh-token');
         config()->set('vandar.ipg.api_key', 'fake-ipg-api-key');
         config()->set('vandar.ipg.callback_url', 'https://example.com/fake-callback');
+        config()->set('vandar.base_urls.subscription', 'https://subscription.vandar.io');
     }
 
     /**
@@ -69,6 +70,18 @@ final class OfficialEndpointContractTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_subscription_authorization_url_matches_official_redirect_contract(): void
+    {
+        Http::fake();
+
+        $this->assertSame(
+            'https://subscription.vandar.io/authorizations/fake-authorization-token',
+            Vandar::subscriptions()->authorizationUrl('fake-authorization-token'),
+        );
+
+        Http::assertNothingSent();
+    }
+
     public function test_endpoint_support_documentation_exists_and_readme_links_it(): void
     {
         $root = dirname(__DIR__, 2);
@@ -83,15 +96,38 @@ final class OfficialEndpointContractTest extends TestCase
         $this->assertStringContainsString('CustomerResource::authenticationShahkar()', $matrix);
         $this->assertStringContainsString('CustomerResource::cashInCode()', $matrix);
         $this->assertStringContainsString('CustomerResource::deleteCashInCode()', $matrix);
+        $this->assertStringContainsString('SubscriptionResource::createAuthorization()', $matrix);
+        $this->assertStringContainsString('SubscriptionResource::createWithdrawal()', $matrix);
+        $this->assertStringContainsString('SubscriptionResource::createRefund()', $matrix);
         $this->assertStringContainsString('Subscription / direct debit', $matrix);
-        $this->assertStringContainsString('future module', $matrix);
+        $this->assertStringContainsString('| Ravand | Official Ravand endpoint group | none | future module |', $matrix);
         $this->assertStringNotContainsString('official facts used here did not enumerate each customer-card endpoint', $matrix);
 
         preg_match('/## Features(?P<features>.*?)## Installation/s', $readme, $matches);
         $features = (string) ($matches['features'] ?? '');
 
-        $this->assertStringNotContainsString('Subscription', $features);
-        $this->assertStringNotContainsString('Direct debit', $features);
+        $this->assertStringContainsString('Subscription / Direct Debit APIs', $features);
+        $this->assertStringNotContainsString('Ravand', $features);
+    }
+
+    /**
+     * @param  Closure(): mixed  $call
+     */
+    #[DataProvider('subscriptionSideEffectContracts')]
+    public function test_subscription_side_effect_contracts_are_not_retried_by_default(Closure $call): void
+    {
+        config()->set('vandar.rate_limit.max_retry_after_seconds', 0);
+
+        Http::fake([
+            'https://api.vandar.io/*' => Http::sequence()
+                ->push(['message' => 'Too many requests'], 429, ['Retry-After' => '0'])
+                ->push(['ok' => true], 200),
+        ]);
+
+        $response = $call();
+
+        $this->assertTrue($response->tooManyRequests());
+        Http::assertSentCount(1);
     }
 
     /**
@@ -518,6 +554,107 @@ final class OfficialEndpointContractTest extends TestCase
                 true,
                 static fn (Request $request): bool => $request['track_id'] === 'fake-track-id',
             ],
+            'subscription active banks' => [
+                static fn (): mixed => Vandar::subscriptions()->activeBanks(),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/banks/actives',
+                true,
+            ],
+            'subscription authorization create' => [
+                static fn (): mixed => Vandar::subscriptions()->createAuthorization(['track_id' => 'fake-track-id']),
+                'POST',
+                'https://api.vandar.io/v3/business/test-business/subscription/authorization/store',
+                true,
+                static fn (Request $request): bool => $request['track_id'] === 'fake-track-id',
+            ],
+            'subscription authorization verify' => [
+                static fn (): mixed => Vandar::subscriptions()->verifyAuthorization('fake-authorization-id', ['track_id' => 'fake-track-id']),
+                'PATCH',
+                'https://api.vandar.io/v3/business/test-business/subscription/authorization/fake-authorization-id/verify',
+                true,
+                static fn (Request $request): bool => $request['track_id'] === 'fake-track-id',
+            ],
+            'subscription authorization search' => [
+                static fn (): mixed => Vandar::subscriptions()->searchAuthorization('fake-authorization-id', ['page' => 1]),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/authorization/fake-authorization-id/search?page=1',
+                true,
+            ],
+            'subscription authorization list' => [
+                static fn (): mixed => Vandar::subscriptions()->listAuthorizations(['page' => 1]),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/authorization?page=1',
+                true,
+            ],
+            'subscription authorization calculation' => [
+                static fn (): mixed => Vandar::subscriptions()->authorizationCalculation('fake-authorization-id', ['amount' => 100000]),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/authorization/fake-authorization-id/calculation?amount=100000',
+                true,
+            ],
+            'subscription authorization delete' => [
+                static fn (): mixed => Vandar::subscriptions()->deleteAuthorization('fake-authorization-id'),
+                'DELETE',
+                'https://api.vandar.io/v3/business/test-business/subscription/authorization/fake-authorization-id',
+                true,
+            ],
+            'subscription withdrawal create' => [
+                static fn (): mixed => Vandar::subscriptions()->createWithdrawal(['amount' => 100000]),
+                'POST',
+                'https://api.vandar.io/v3/business/test-business/subscription/withdrawal/store',
+                true,
+                static fn (Request $request): bool => $request['amount'] === 100000,
+            ],
+            'subscription withdrawal find' => [
+                static fn (): mixed => Vandar::subscriptions()->findWithdrawal('fake-withdrawal-id'),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/withdrawal/fake-withdrawal-id',
+                true,
+            ],
+            'subscription withdrawal by track id' => [
+                static fn (): mixed => Vandar::subscriptions()->withdrawalByTrackId('fake-track-id'),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/withdrawal/track-id/fake-track-id',
+                true,
+            ],
+            'subscription withdrawal list' => [
+                static fn (): mixed => Vandar::subscriptions()->listWithdrawals(['page' => 1]),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/withdrawal?page=1',
+                true,
+            ],
+            'subscription withdrawal list by authorization' => [
+                static fn (): mixed => Vandar::subscriptions()->withdrawalsForAuthorization('fake-authorization-id', ['page' => 1]),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/withdrawal?page=1&q=fake-authorization-id',
+                true,
+            ],
+            'subscription withdrawal update' => [
+                static fn (): mixed => Vandar::subscriptions()->updateWithdrawal('fake-withdrawal-id', ['status' => 'canceled']),
+                'PUT',
+                'https://api.vandar.io/v3/business/test-business/subscription/withdrawal/fake-withdrawal-id',
+                true,
+                static fn (Request $request): bool => $request['status'] === 'canceled',
+            ],
+            'subscription refund create' => [
+                static fn (): mixed => Vandar::subscriptions()->createRefund(['withdrawal_id' => 'fake-withdrawal-id']),
+                'POST',
+                'https://api.vandar.io/v3/business/test-business/subscription/refunds',
+                true,
+                static fn (Request $request): bool => $request['withdrawal_id'] === 'fake-withdrawal-id',
+            ],
+            'subscription refund find' => [
+                static fn (): mixed => Vandar::subscriptions()->findRefund('fake-refund-id'),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/refunds/fake-refund-id',
+                true,
+            ],
+            'subscription refund list' => [
+                static fn (): mixed => Vandar::subscriptions()->listRefunds(['page' => 1]),
+                'GET',
+                'https://api.vandar.io/v3/business/test-business/subscription/refunds?page=1',
+                true,
+            ],
         ];
     }
 
@@ -532,6 +669,21 @@ final class OfficialEndpointContractTest extends TestCase
             "https://api.vandar.io/v3/business/test-business/customers/inquiry/{$endpoint}",
             true,
             static fn (Request $request): bool => $request['track_id'] === 'fake-track-id',
+        ];
+    }
+
+    /**
+     * @return array<string, array{Closure(): mixed}>
+     */
+    public static function subscriptionSideEffectContracts(): array
+    {
+        return [
+            'authorization create' => [static fn (): mixed => Vandar::subscriptions()->createAuthorization(['track_id' => 'fake-track-id'])],
+            'authorization verify' => [static fn (): mixed => Vandar::subscriptions()->verifyAuthorization('fake-authorization-id')],
+            'authorization delete' => [static fn (): mixed => Vandar::subscriptions()->deleteAuthorization('fake-authorization-id')],
+            'withdrawal create' => [static fn (): mixed => Vandar::subscriptions()->createWithdrawal(['amount' => 100000])],
+            'withdrawal update' => [static fn (): mixed => Vandar::subscriptions()->updateWithdrawal('fake-withdrawal-id', ['status' => 'canceled'])],
+            'refund create' => [static fn (): mixed => Vandar::subscriptions()->createRefund(['withdrawal_id' => 'fake-withdrawal-id'])],
         ];
     }
 }

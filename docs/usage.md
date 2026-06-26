@@ -165,6 +165,42 @@ $batch = Vandar::batchSettlements()->create([
 ]);
 ```
 
+## Subscription / Direct Debit
+
+Direct Debit / Subscription services may require activation from Vandar. The authorization redirect URL is for sending the user to the Vandar or bank authorization flow. The package only sends requests and returns `VandarResponse`; your application must store authorization IDs, withdrawal IDs, track IDs, refund IDs, and statuses safely.
+
+```php
+$banks = Vandar::subscriptions()->activeBanks();
+
+$authorization = Vandar::subscriptions()->createAuthorization([
+    'track_id' => 'fake-track-id',
+    'mobile' => 'fake-mobile',
+    'national_code' => 'fake-national-code',
+]);
+
+$authorizationUrl = Vandar::subscriptions()->authorizationUrl(
+    $authorization->string('token') ?? 'fake-authorization-token',
+);
+
+$verified = Vandar::subscriptions()->verifyAuthorization('fake-authorization-id', [
+    'track_id' => 'fake-track-id',
+]);
+
+$withdrawal = Vandar::subscriptions()->createWithdrawal([
+    'authorization_id' => 'fake-authorization-id',
+    'amount' => 100000,
+    'track_id' => 'fake-track-id',
+]);
+
+$refund = Vandar::subscriptions()->createRefund([
+    'withdrawal_id' => 'fake-withdrawal-id',
+    'amount' => 100000,
+    'track_id' => 'fake-track-id',
+]);
+```
+
+Money-moving direct debit withdrawal and refund calls are not retried automatically by default. Your application still needs idempotency, authorization, reconciliation, and duplicate-prevention. Do not log sensitive bank, account, card, IBAN, mobile, national-code, authorization, withdrawal, refund, or customer values without redaction.
+
 ## Avand/Cash-In
 
 ```php

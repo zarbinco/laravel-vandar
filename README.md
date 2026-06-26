@@ -20,6 +20,7 @@ This package is unofficial and is not affiliated with Vandar.
 - IPG payment send, redirect URL, transaction, and verify helpers
 - Refunds
 - Settlements, queued settlements, and batch settlements
+- Subscription / Direct Debit APIs
 - Avand/Cash-in account, statement, balance, label, code, and suspicious-payment helpers
 - Offline testing fakes with `Vandar::fake()`
 
@@ -224,7 +225,7 @@ More examples are available in [docs/usage.md](docs/usage.md).
 
 ## Endpoint Coverage
 
-See [docs/endpoint-support.md](docs/endpoint-support.md) for the current official Vandar endpoint support matrix. The package intentionally separates implemented core APIs from planned modules such as Subscription/Direct Debit and Ravand.
+See [docs/endpoint-support.md](docs/endpoint-support.md) for the current official Vandar endpoint support matrix. The package intentionally separates implemented APIs from planned modules such as Ravand.
 
 ## Response Handling
 
@@ -341,7 +342,6 @@ Your Laravel application owns persistence, authorization, operational review, re
 
 Not yet implemented:
 
-- Subscription / Direct Debit planned as a future module
 - Ravand planned as a future module
 - Card issuing and banking resources
 - Optional encrypted database token store

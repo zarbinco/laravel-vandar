@@ -90,18 +90,21 @@ Statuses:
 | Cash-in account | `GET /v3/business/:business/cash-in/account` | `AvandResource::account()` / `cashInAccount()` | supported |  |
 | Cash-in account | `POST /v3/business/:business/cash-in/account/deposit` | `AvandResource::deposit()` | supported | Money-moving request is not retried automatically. |
 | Cash-in account | `POST /v3/business/:business/cash-in/account/balance` | `AvandResource::balance()` | supported |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/banks/actives` | none | future module | Subscription / Direct Debit is intentionally tracked as a future module. Official docs include active banks, authorization create/redirect/verify/search/list/calculation/delete, withdrawal create/show/list/update, and subscription refund endpoints. These should be implemented and contract-tested in a later dedicated module. |
-| Subscription / direct debit | `POST /v3/business/:business/subscription/authorization/store` | none | future module |  |
-| Subscription / direct debit | `GET https://subscription.vandar.io/authorizations/:token` | none | future module |  |
-| Subscription / direct debit | `PATCH /v3/business/:business/subscription/authorization/:authorization_id/verify` | none | future module |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/authorization/:authorization_id/search` | none | future module |  |
-| Subscription / direct debit | `POST /v3/business/:business/subscription/withdrawal/store` | none | future module |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal/:withdrawal_id` | none | future module |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal/track-id/:track_id` | none | future module |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal` | none | future module |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal?q=:authorization_id` | none | future module |  |
-| Subscription / direct debit | `PUT /v3/business/:business/subscription/withdrawal/:withdrawal_id` | none | future module |  |
-| Subscription / direct debit | `POST /v3/business/:business/subscription/refunds` | none | future module |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/refunds/:refund_id` | none | future module |  |
-| Subscription / direct debit | `GET /v3/business/:business/subscription/refunds` | none | future module |  |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/banks/actives` | `SubscriptionResource::activeBanks()` / `banks()` | supported | Direct Debit / Subscription services may require activation from Vandar. |
+| Subscription / direct debit | `POST /v3/business/:business/subscription/authorization/store` | `SubscriptionResource::createAuthorization()` / `storeAuthorization()` | supported | Side-effect request is not retried automatically by default. |
+| Subscription / direct debit | `GET https://subscription.vandar.io/authorizations/:token` | `SubscriptionResource::authorizationUrl()` / `authorizationRedirectUrl()` / `mandateUrl()` | supported | Returns a browser redirect URL string; no HTTP request is made. |
+| Subscription / direct debit | `PATCH /v3/business/:business/subscription/authorization/:authorization_id/verify` | `SubscriptionResource::verifyAuthorization()` | supported | Side-effect request is not retried automatically by default. |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/authorization/:authorization_id/search` | `SubscriptionResource::searchAuthorization()` | supported |  |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/authorization` | `SubscriptionResource::listAuthorizations()` / `authorizations()` | supported |  |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/authorization/:authorization_id/calculation` | `SubscriptionResource::authorizationCalculation()` | supported |  |
+| Subscription / direct debit | `DELETE /v3/business/:business/subscription/authorization/:authorization_id` | `SubscriptionResource::deleteAuthorization()` / `cancelAuthorization()` / `destroyAuthorization()` | supported | Side-effect request is not retried automatically by default. |
+| Subscription / direct debit | `POST /v3/business/:business/subscription/withdrawal/store` | `SubscriptionResource::createWithdrawal()` / `storeWithdrawal()` | supported | Money-moving request is not retried automatically by default. |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal/:withdrawal_id` | `SubscriptionResource::findWithdrawal()` / `showWithdrawal()` / `withdrawal()` | supported |  |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal/track-id/:track_id` | `SubscriptionResource::withdrawalByTrackId()` | supported |  |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal` | `SubscriptionResource::listWithdrawals()` / `withdrawals()` | supported |  |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/withdrawal?q=:authorization_id` | `SubscriptionResource::withdrawalsForAuthorization()` | supported | The authorization query value is redacted in package logs. |
+| Subscription / direct debit | `PUT /v3/business/:business/subscription/withdrawal/:withdrawal_id` | `SubscriptionResource::updateWithdrawal()` | supported | Side-effect request is not retried automatically by default. |
+| Subscription / direct debit | `POST /v3/business/:business/subscription/refunds` | `SubscriptionResource::createRefund()` / `storeRefund()` | supported | Side-effect request is not retried automatically by default. |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/refunds/:refund_id` | `SubscriptionResource::findRefund()` / `showRefund()` / `refund()` | supported |  |
+| Subscription / direct debit | `GET /v3/business/:business/subscription/refunds` | `SubscriptionResource::listRefunds()` / `refunds()` | supported |  |
 | Ravand | Official Ravand endpoint group | none | future module | Ravand has many endpoints and is intentionally left for a separate module. |

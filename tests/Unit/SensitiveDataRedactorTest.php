@@ -209,6 +209,17 @@ final class SensitiveDataRedactorTest extends TestCase
             'track_id' => 'fake-track-id',
             'tracking_code' => 'fake-tracking-code',
             'trackingCode' => 'fake-tracking-code',
+            'trackId' => 'fake-track-id',
+            'authorization_id' => 'fake-authorization-id',
+            'authorizationId' => 'fake-authorization-id',
+            'withdrawal_id' => 'fake-withdrawal-id',
+            'withdrawalId' => 'fake-withdrawal-id',
+            'refund_id' => 'fake-refund-id',
+            'refundId' => 'fake-refund-id',
+            'mandate_id' => 'fake-mandate-id',
+            'mandateId' => 'fake-mandate-id',
+            'subscription_id' => 'fake-subscription-id',
+            'subscriptionId' => 'fake-subscription-id',
             'settlement_id' => 'fake-settlement-id',
             'settlement_track_id' => 'fake-track-id',
             'batch_id' => 'fake-batch-id',
@@ -222,7 +233,9 @@ final class SensitiveDataRedactorTest extends TestCase
             'destination_iban' => 'fake-iban',
             'source_iban' => 'fake-iban',
             'bank_account' => 'fake-account-number',
+            'bankAccount' => 'fake-account-number',
             'account' => 'fake-account-number',
+            'accountNumber' => 'fake-account-number',
             'transfer_id' => 'fake-transfer-id',
             'deposit_id' => 'fake-deposit-id',
             'suspicious_payment_id' => 'fake-suspicious-payment-id',
@@ -242,6 +255,17 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['track_id']);
         $this->assertSame('[redacted]', $redacted['tracking_code']);
         $this->assertSame('[redacted]', $redacted['trackingCode']);
+        $this->assertSame('[redacted]', $redacted['trackId']);
+        $this->assertSame('[redacted]', $redacted['authorization_id']);
+        $this->assertSame('[redacted]', $redacted['authorizationId']);
+        $this->assertSame('[redacted]', $redacted['withdrawal_id']);
+        $this->assertSame('[redacted]', $redacted['withdrawalId']);
+        $this->assertSame('[redacted]', $redacted['refund_id']);
+        $this->assertSame('[redacted]', $redacted['refundId']);
+        $this->assertSame('[redacted]', $redacted['mandate_id']);
+        $this->assertSame('[redacted]', $redacted['mandateId']);
+        $this->assertSame('[redacted]', $redacted['subscription_id']);
+        $this->assertSame('[redacted]', $redacted['subscriptionId']);
         $this->assertSame('[redacted]', $redacted['settlement_id']);
         $this->assertSame('[redacted]', $redacted['settlement_track_id']);
         $this->assertSame('[redacted]', $redacted['batch_id']);
@@ -255,7 +279,9 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('[redacted]', $redacted['destination_iban']);
         $this->assertSame('[redacted]', $redacted['source_iban']);
         $this->assertSame('[redacted]', $redacted['bank_account']);
+        $this->assertSame('[redacted]', $redacted['bankAccount']);
         $this->assertSame('[redacted]', $redacted['account']);
+        $this->assertSame('[redacted]', $redacted['accountNumber']);
         $this->assertSame('[redacted]', $redacted['transfer_id']);
         $this->assertSame('[redacted]', $redacted['deposit_id']);
         $this->assertSame('[redacted]', $redacted['suspicious_payment_id']);

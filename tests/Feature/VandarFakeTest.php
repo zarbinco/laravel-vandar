@@ -91,6 +91,26 @@ final class VandarFakeTest extends TestCase
         Vandar::assertSent('settlements.create');
     }
 
+    public function test_fake_can_fake_subscription_response(): void
+    {
+        Vandar::fake([
+            'subscriptions.authorization.create' => [
+                'status' => 201,
+                'body' => [
+                    'token' => 'fake-authorization-token',
+                ],
+            ],
+        ]);
+
+        $response = Vandar::subscriptions()->createAuthorization([
+            'track_id' => 'fake-track-id',
+        ]);
+
+        $this->assertSame(201, $response->status());
+        $this->assertSame('fake-authorization-token', $response->string('token'));
+        Vandar::assertSent('subscriptions.authorization.create');
+    }
+
     public function test_assert_sent_accepts_callback(): void
     {
         Vandar::fake([

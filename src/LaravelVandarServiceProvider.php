@@ -23,6 +23,7 @@ use Zarbinco\LaravelVandar\Resources\QueuedSettlementResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Resources\RefundResource;
 use Zarbinco\LaravelVandar\Resources\SettlementResource;
+use Zarbinco\LaravelVandar\Resources\SubscriptionResource;
 use Zarbinco\LaravelVandar\Support\BusinessResolver;
 use Zarbinco\LaravelVandar\Support\IpgApiKeyResolver;
 use Zarbinco\LaravelVandar\Token\CacheTokenStore;
@@ -57,6 +58,7 @@ final class LaravelVandarServiceProvider extends ServiceProvider
         $this->app->singleton(QueuedSettlementResource::class);
         $this->app->singleton(BatchSettlementResource::class);
         $this->app->singleton(AvandResource::class);
+        $this->app->singleton(SubscriptionResource::class);
         $this->app->singleton(CustomerResource::class);
 
         $this->app->singleton('vandar', fn ($app): LaravelVandar => new LaravelVandar(
@@ -75,6 +77,7 @@ final class LaravelVandarServiceProvider extends ServiceProvider
             $app->make(QueuedSettlementResource::class),
             $app->make(BatchSettlementResource::class),
             $app->make(AvandResource::class),
+            $app->make(SubscriptionResource::class),
         ));
         $this->app->alias('vandar', LaravelVandar::class);
     }

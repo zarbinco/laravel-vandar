@@ -21,6 +21,7 @@ use Zarbinco\LaravelVandar\Resources\QueuedSettlementResource;
 use Zarbinco\LaravelVandar\Resources\RawResource;
 use Zarbinco\LaravelVandar\Resources\RefundResource;
 use Zarbinco\LaravelVandar\Resources\SettlementResource;
+use Zarbinco\LaravelVandar\Resources\SubscriptionResource;
 use Zarbinco\LaravelVandar\Testing\VandarFake;
 use Zarbinco\LaravelVandar\Token\TokenManager;
 
@@ -42,6 +43,7 @@ final class LaravelVandar
         private readonly QueuedSettlementResource $queuedSettlements,
         private readonly BatchSettlementResource $batchSettlements,
         private readonly AvandResource $avand,
+        private readonly SubscriptionResource $subscriptions,
     ) {}
 
     public function name(): string
@@ -200,6 +202,21 @@ final class LaravelVandar
     public function cashIn(): AvandResource
     {
         return $this->avand();
+    }
+
+    public function subscriptions(): SubscriptionResource
+    {
+        return $this->subscriptions;
+    }
+
+    public function subscription(): SubscriptionResource
+    {
+        return $this->subscriptions();
+    }
+
+    public function directDebit(): SubscriptionResource
+    {
+        return $this->subscriptions();
     }
 
     /**

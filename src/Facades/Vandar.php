@@ -32,6 +32,9 @@ use Zarbinco\LaravelVandar\LaravelVandar;
  * @method static \Zarbinco\LaravelVandar\Resources\BatchSettlementResource batchSettlements()
  * @method static \Zarbinco\LaravelVandar\Resources\AvandResource avand()
  * @method static \Zarbinco\LaravelVandar\Resources\AvandResource cashIn()
+ * @method static \Zarbinco\LaravelVandar\Resources\SubscriptionResource subscriptions()
+ * @method static \Zarbinco\LaravelVandar\Resources\SubscriptionResource subscription()
+ * @method static \Zarbinco\LaravelVandar\Resources\SubscriptionResource directDebit()
  * @method static \Zarbinco\LaravelVandar\DTO\VandarResponse response(array $payload = [], int $status = 200, array $headers = [])
  *
  * @see LaravelVandar
