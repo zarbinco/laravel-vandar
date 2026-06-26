@@ -17,6 +17,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Added customer authentication and customer cash-in-code endpoint coverage.
 - Added Subscription / Direct Debit API coverage.
 - Added Larastan/PHPStan static analysis and CI quality gates.
+- Added upgrade, production, and release checklist documentation.
 
 ### Changed
 
@@ -24,6 +25,9 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Improved package documentation, security guidance, and contribution workflow.
 - Improved URL and payload handling for package logs and exception context.
 - Polished the endpoint support matrix for customer card and subscription/direct-debit coverage.
+- Polished package documentation and release readiness checks.
+- Clarified safe logging documentation for `VandarResponse::toArray()`, `redactedBody()`, and redacted exception context.
+- Raised the minimum Laravel Pint dev-tool version and adjusted lowest-dependency CI quality gates.
 
 ### Security
 

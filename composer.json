@@ -1,6 +1,6 @@
 {
     "name": "zarbinco/laravel-vandar",
-    "description": "An unofficial Laravel SDK for Vandar APIs.",
+    "description": "An unofficial Laravel SDK/client for Vandar payment, IPG, settlement, and direct debit APIs.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://github.com/zarbinco/laravel-vandar",
@@ -10,11 +10,14 @@
         "payment",
         "ipg",
         "settlement",
+        "direct-debit",
         "iban",
         "card",
         "inquiry",
+        "cash-in",
         "sdk",
-        "iran"
+        "iran",
+        "fintech"
     ],
     "support": {
         "issues": "https://github.com/zarbinco/laravel-vandar/issues",
@@ -38,7 +41,7 @@
         "larastan/larastan": "^3.0",
         "orchestra/testbench": "^9.0|^10.0",
         "phpunit/phpunit": "^10.5|^11.0|^12.0",
-        "laravel/pint": "^1.18"
+        "laravel/pint": "^1.29.3"
     },
     "autoload": {
         "psr-4": {

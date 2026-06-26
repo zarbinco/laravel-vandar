@@ -40,8 +40,16 @@ foreach ([
     'config/vandar.php',
     'src/LaravelVandarServiceProvider.php',
     'README.md',
+    'CHANGELOG.md',
+    'CONTRIBUTING.md',
     'SECURITY.md',
     'LICENSE.md',
+    'UPGRADE.md',
+    'docs/endpoint-support.md',
+    'docs/security.md',
+    'docs/usage.md',
+    'docs/release-checklist.md',
+    'docs/production-checklist.md',
 ] as $requiredFile) {
     is_file($path($requiredFile))
         ? $pass("{$requiredFile} exists")
@@ -61,8 +69,16 @@ if ($trackedFiles !== []) {
             $fail('vendor/ is not committed');
         }
 
+        if (str_starts_with($trackedFile, 'node_modules/')) {
+            $fail('node_modules/ is not committed');
+        }
+
         if ($trackedFile === '.env') {
             $fail('.env is not committed');
+        }
+
+        if ($trackedFile === '.phpunit.result.cache') {
+            $fail('.phpunit.result.cache is not committed');
         }
 
         if ($trackedFile === 'composer.lock') {
@@ -70,7 +86,7 @@ if ($trackedFiles !== []) {
         }
     }
 
-    $pass('tracked files do not include vendor/, .env, or composer.lock');
+    $pass('tracked files do not include vendor/, node_modules/, .env, .phpunit.result.cache, or composer.lock');
 } else {
     is_file($path('.env')) ? $fail('.env is absent') : $pass('.env is absent');
 }
@@ -79,8 +95,22 @@ if (is_dir($path('vendor'))) {
     $warn('vendor/ exists locally; it is allowed for development but excluded from release archives');
 }
 
+if (is_dir($path('node_modules'))) {
+    $warn('node_modules/ exists locally; it must be excluded from release archives');
+}
+
+if (is_file($path('.phpunit.result.cache'))) {
+    $warn('.phpunit.result.cache exists locally; it is excluded from release archives');
+}
+
 if (is_file($path('composer.lock'))) {
     $warn('composer.lock exists locally; it is excluded from release archives');
+}
+
+foreach (['.env', '.env.local', '.env.production'] as $envFile) {
+    is_file($path($envFile))
+        ? $fail("real-looking {$envFile} is absent from the package root")
+        : $pass("{$envFile} is absent from the package root");
 }
 
 $scanFiles = scanFiles($root, [
@@ -101,6 +131,8 @@ $patterns = [
     'real-looking IBAN' => '/\bIR\d{24}\b/',
     '16-digit card number' => '/(?<!\d)\d{16}(?!\d)/',
     'Iranian mobile number' => '/\b09\d{9}\b/',
+    'real-looking Vandar secret env value' => '/^VANDAR_(?:ACCESS_TOKEN|REFRESH_TOKEN|IPG_API_KEY)[^\S\r\n]*=[^\S\r\n]*(?!(?:$|#|fake|your|example|test|changeme|<))/im',
+    'real-looking authorization bearer value' => '/\bAuthorization\s*:\s*Bearer\s+(?!fake|example|test|your|<)[A-Za-z0-9._~+\/-]{16,}/i',
 ];
 
 foreach ($scanFiles as $file) {

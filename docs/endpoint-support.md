@@ -10,6 +10,14 @@ Statuses:
 - `future module`: intentionally left for a separate package module.
 - `docs ambiguity`: official documentation is ambiguous or differs from the package's current endpoint contract.
 
+Current notes:
+
+- Customer cards are supported.
+- Customer authentication and customer cash-in-code endpoints are supported.
+- Subscription / Direct Debit endpoints are supported through `Vandar::subscriptions()`, `Vandar::subscription()`, and `Vandar::directDebit()`.
+- Ravand remains a future module and is not advertised as supported.
+- Customer IBAN delete path ambiguity remains documented in the matrix below.
+
 | Service area | Official endpoint / method | Package resource / method | Status | Notes |
 | --- | --- | --- | --- | --- |
 | Business | `GET /v2/business/:business` | `BusinessResource::info()` | supported | Uses main `https://api.vandar.io` base URL. |

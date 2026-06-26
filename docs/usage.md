@@ -25,11 +25,45 @@ VANDAR_RETRY_MONEY_MOVING_REQUESTS=false
 
 Token refresh is lock-protected to reduce duplicate refresh calls when many requests hit near token expiry. Vandar also applies request limits; safe methods may be retried once on `429`, while money-moving requests are not retried by default.
 
-## Business
+## API Resources
+
+Available resource entry points:
+
+```text
+Vandar::business()
+Vandar::customers()
+Vandar::cards()
+Vandar::ibans()
+Vandar::inquiries()
+Vandar::ipg()
+Vandar::refunds()
+Vandar::settlements()
+Vandar::queuedSettlements()
+Vandar::batchSettlements()
+Vandar::avand()
+Vandar::cashIn()
+Vandar::subscriptions()
+Vandar::subscription()
+Vandar::directDebit()
+```
+
+Ravand is not implemented and remains future work.
+
+## Basic Request
 
 ```php
 use Zarbinco\LaravelVandar\Facades\Vandar;
 
+$balance = Vandar::business()->balance();
+
+if ($balance->successful()) {
+    $data = $balance->data();
+}
+```
+
+## Business
+
+```php
 $balance = Vandar::business()->balance();
 $transactions = Vandar::business()->transactions(['page' => 1]);
 ```
@@ -214,6 +248,8 @@ All resource calls return `Zarbinco\LaravelVandar\DTO\VandarResponse`.
 
 `json()` returns the parsed JSON array when available. `body()` keeps the raw response body for debugging, and `redactedBody()` returns a safer text body for logs. Use `jsonParseFailed()` to detect malformed JSON or unexpected upstream response bodies. Never log raw response bodies in production.
 
+Do not log `$response->toArray()` directly in production unless parsed JSON and headers have been redacted. `toArray()` includes `redacted_body` instead of raw body, but it preserves parsed JSON and headers for compatibility. Package exception context is redacted automatically.
+
 ```php
 $response = Vandar::ipg()->verify($token);
 
@@ -235,3 +271,40 @@ if ($response->rateLimited()) {
 ```
 
 Applications should implement queue throttling and idempotency for high-volume or financial workflows. A retried financial operation is only safe when your application provides the idempotency guarantees.
+
+## Testing With Fakes
+
+Use `Vandar::fake()` to test application code without real HTTP calls.
+
+```php
+Vandar::fake([
+    'ipg.send' => [
+        'status' => 200,
+        'body' => [
+            'status' => 1,
+            'token' => 'fake-payment-token',
+        ],
+    ],
+]);
+
+$response = Vandar::ipg()->send([
+    'amount' => 100000,
+    'callback_url' => 'https://example.com/payments/callback',
+]);
+
+Vandar::assertSent('ipg.send');
+Vandar::assertSentCount('ipg.send', 1);
+Vandar::assertNotSent('ipg.verify');
+```
+
+URL-based fakes are also supported:
+
+```php
+Vandar::fake([
+    'POST https://ipg.vandar.io/api/v4/send' => [
+        'body' => ['token' => 'fake-payment-token'],
+    ],
+]);
+```
+
+See [testing.md](testing.md) for more testing examples.

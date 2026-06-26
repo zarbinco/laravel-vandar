@@ -17,11 +17,14 @@ Use `vendor/bin/pint` to apply formatting fixes.
 Before opening a pull request, run:
 
 ```bash
+composer validate --strict
 composer format:test
 composer analyse
 composer test
 composer audit:release
 ```
+
+`composer format:test` and `composer analyse` are CI quality gates. The GitHub lowest-dependency job focuses on runtime/test compatibility and may skip dev-tool-only checks such as formatting and static analysis.
 
 ## Pull Requests
 
@@ -38,9 +41,8 @@ Before opening a release-oriented pull request, run:
 
 ```bash
 composer validate --strict
-composer dump-autoload
+composer format:test
 composer analyse
 composer test
-composer format:test
 composer audit:release
 ```

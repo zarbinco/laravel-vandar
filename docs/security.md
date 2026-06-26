@@ -1,33 +1,84 @@
 # Security Notes
 
-Treat this SDK as a transport layer. Your application remains responsible for authorization, persistence, retention, reconciliation, and operational controls.
+Treat this package as a transport layer. Your application remains responsible for authorization, persistence, retention, reconciliation, access control, and operational review.
 
-## Secrets
+## API keys and tokens
 
-Never commit real Vandar access tokens, refresh tokens, IPG API keys, callback URLs, or bearer values. Refresh tokens and IPG API keys are secrets.
+Never commit, paste, screenshot, or print real Vandar credentials.
 
-Packagist and GitHub tokens used for package auto-update are maintainer secrets. Prefer the built-in GitHub and Packagist integration where possible, and never commit those tokens to source code, docs, tests, issues, or screenshots.
+Sensitive credential values include:
 
-## Private Data
+- IPG API keys
+- Access tokens
+- Refresh tokens
+- Authorization headers
+- Payment tokens
+- Packagist or GitHub tokens used by maintainers
 
-Customer identity, card, IBAN, mobile, postal, inquiry image, company signature, statement, settlement, cash-in, batch, refund, IPG callback, and verify response data are sensitive. Use fake placeholder values in tests and issue reports.
+Refresh tokens are especially sensitive because they can be exchanged for new access tokens. The token refresh command does not print access or refresh tokens.
 
-## Logging
+## Raw response bodies
 
-Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, and dynamic path values. Your application logs, APM tools, queue payloads, audit logs, and exception reporters still need their own redaction policies.
+`VandarResponse::body()` returns the raw upstream body. It is useful for debugging malformed JSON, HTML error pages, or unexpected upstream responses, but it may contain private customer, bank, payment, settlement, or direct debit data.
 
-IPG callback payloads and verify responses can include payment tokens, transaction identifiers, card hashes, CID values, amounts, and other payment data. Log them only after redaction.
+Do not log raw bodies in production. For raw upstream response diagnostics, prefer `$response->redactedBody()`.
 
-Direct debit payloads and responses may contain sensitive customer, bank, account, authorization, withdrawal, refund, and payment identifiers. Do not log raw authorization tokens, withdrawal IDs, account numbers, IBANs, card numbers, national codes, or mobile numbers. Prefer `redactedBody()` and package-redacted request/response context for diagnostics.
+```php
+logger()->warning('Unexpected Vandar response body', [
+    'status' => $response->status(),
+    'content_type' => $response->contentType(),
+    'body' => $response->redactedBody(),
+]);
+```
 
-`VandarResponse::body()` exposes the raw upstream response body for debugging. Do not log raw bodies in production. Prefer `redactedBody()` or `toArray()`, which includes only `redacted_body` and never includes the raw body value.
+Safe:
 
-## Money-Moving Requests
+- `$response->redactedBody()` for raw body diagnostics
+- Package exception context, which is redacted before being attached
 
-Payment, refund, settlement, queued settlement, batch settlement, Avand deposit, transaction label writes, and suspicious-payment resolution calls should be protected with authorization, idempotency, audit logging, duplicate-prevention, and reconciliation.
+Unsafe unless manually redacted:
 
-The package does not automatically retry known unsafe money-moving requests. Rate-limit handling can retry safe methods on `429`, but money-moving retries require explicit opt-in and are only safe when the application provides idempotency guarantees.
+- `$response->body()`
+- `$response->json()`
+- `$response->headers()`
+- `$response->toArray()`
 
-Token refresh is protected with cache locks when available to reduce duplicate refresh calls under concurrent traffic. Token refresh exceptions and context must not include raw access tokens or refresh tokens.
+`toArray()` avoids raw body leakage by using `redacted_body`, but parsed JSON and headers may still contain sensitive values. Redact parsed JSON and headers before logging direct response arrays.
 
-SSL verification defaults to true and should not be disabled in production.
+## Redacted package logging
+
+Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, and dynamic path values before writing request summaries.
+
+This redaction is a defensive helper. Application logs, audit trails, exception reporters, queue payloads, APM traces, support exports, and database records still need their own review.
+
+## IPG callbacks
+
+Never trust an IPG callback alone. A callback can report an OK status without being sufficient for a final paid-state decision.
+
+Use `callbackHasOkStatus()` only when you need to inspect the raw callback status. Use `verifyCallback()` before marking an invoice or order as paid, then compare amount, factor number/order id, token, transaction id, and your local payment record. Apply idempotency so duplicate callbacks cannot double-apply a payment.
+
+## Identity payloads
+
+National codes, mobile numbers, postal codes, birth dates, KYC payloads, identity images, company information, and company signatures are private data. Use fake placeholder values in tests, docs, issues, pull requests, and support examples.
+
+## Card and IBAN data
+
+Card numbers, card hashes, CIDs, IBANs, account numbers, reference numbers, and card-to-IBAN inquiry payloads should be treated as sensitive. Avoid logging them directly, and store only the values your application truly needs.
+
+## Direct debit identifiers
+
+Subscription / Direct Debit payloads can include bank, account, authorization, withdrawal, refund, track, and customer identifiers. Store them safely and do not log raw authorization tokens, withdrawal IDs, refund IDs, account numbers, IBANs, card numbers, national codes, or mobile numbers.
+
+Money-moving direct debit withdrawal and refund calls are not retried automatically by default. Only enable money-moving retries when your application has idempotency and reconciliation controls.
+
+## SSL verification
+
+SSL verification defaults to true through `VANDAR_HTTP_VERIFY_SSL=true`. Do not disable SSL verification in production.
+
+## Fake and testing mode
+
+Use `Vandar::fake()` and Laravel HTTP fakes for tests. Do not use real Vandar credentials, customer data, callback URLs, cards, IBANs, tokens, or transaction IDs in fixtures or assertions.
+
+## Responsible disclosure
+
+Do not open public issues that include vulnerabilities, credentials, or private customer/payment data. Follow the private reporting guidance in [SECURITY.md](../SECURITY.md).

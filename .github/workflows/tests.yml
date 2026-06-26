@@ -54,9 +54,11 @@ jobs:
         run: composer update ${{ matrix.composer-options }} --prefer-dist --no-interaction --no-progress
 
       - name: Run Pint
+        if: matrix.dependencies != 'lowest'
         run: composer format:test
 
       - name: Run Static Analysis
+        if: matrix.dependencies != 'lowest'
         run: composer analyse
 
       - name: Run Tests
