@@ -13,12 +13,14 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Added safe response DTOs and exception mapping.
 - Added testing utilities for faking Vandar API responses.
 - Added release audit script and GitHub Actions workflow.
+- Added official Vandar endpoint support matrix and contract tests for implemented resources.
 
 ### Changed
 
 - Updated documentation for Packagist installation and auto-update setup.
 - Improved package documentation, security guidance, and contribution workflow.
 - Improved URL and payload handling for package logs and exception context.
+- Polished the endpoint support matrix for customer card and subscription/direct-debit coverage.
 
 ### Security
 

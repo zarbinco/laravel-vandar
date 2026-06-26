@@ -221,6 +221,10 @@ $code = Vandar::cashIn()->code();
 
 More examples are available in [docs/usage.md](docs/usage.md).
 
+## Endpoint Coverage
+
+See [docs/endpoint-support.md](docs/endpoint-support.md) for the current official Vandar endpoint support matrix. The package intentionally separates implemented core APIs from planned modules such as Subscription/Direct Debit and Ravand.
+
 ## Response Handling
 
 Every HTTP resource returns `Zarbinco\LaravelVandar\DTO\VandarResponse`.
