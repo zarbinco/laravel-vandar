@@ -127,6 +127,8 @@ For raw upstream response diagnostics, prefer `$response->redactedBody()`.
 
 Do not log `$response->toArray()` directly in production if parsed JSON or headers may contain sensitive values. `toArray()` preserves parsed JSON and headers for compatibility, while the raw body is exposed only as `redacted_body`. Package exception context is redacted automatically, but application logs should still avoid raw response arrays unless you have applied your own redaction.
 
+Redaction has been improved to also mask standalone Iranian IBANs, card/PAN numbers including spaced or hyphenated formats, Iranian mobile numbers, and national-code-shaped values in text and nested redaction contexts. Treat redaction as defensive best effort, and do not log sensitive raw API responses directly in production. This hardening does not change runtime API behavior, endpoints, authentication, token refresh, public method signatures, or existing config behavior.
+
 ## Safe IPG Payment Flow
 
 IPG callback status is not final payment success. A callback can report `payment_status=OK`, but your application must still verify the payment before marking any invoice or order as paid.
@@ -234,7 +236,7 @@ See [docs/endpoint-support.md](docs/endpoint-support.md) for the current support
 
 Never commit real Vandar credentials or private customer/payment data. Treat access tokens, refresh tokens, IPG API keys, card numbers, IBANs, national codes, mobile numbers, payment tokens, authorization IDs, withdrawal IDs, refund IDs, and transaction IDs as sensitive.
 
-Package logging is disabled by default. When enabled, request and response summaries are redacted before logging. Application logs, exception reporters, queue payloads, APM traces, and support exports remain your responsibility.
+Package logging is disabled by default. When enabled, request and response summaries are redacted before logging. Redaction is defensive best effort, even with the improved standalone value detection. Application logs, exception reporters, queue payloads, APM traces, raw API responses, and support exports remain your responsibility.
 
 SSL verification defaults to true and should not be disabled in production.
 

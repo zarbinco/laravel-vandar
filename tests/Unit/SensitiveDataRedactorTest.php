@@ -385,6 +385,101 @@ final class SensitiveDataRedactorTest extends TestCase
         );
     }
 
+    public function test_it_redacts_standalone_iranian_iban_in_text(): void
+    {
+        $iban = $this->fakeIranianIban();
+        $redacted = SensitiveDataRedactor::redactText("Settlement IBAN {$iban} was returned.");
+
+        $this->assertSame('Settlement IBAN [REDACTED] was returned.', $redacted);
+        $this->assertStringNotContainsString($iban, $redacted);
+    }
+
+    public function test_it_redacts_standalone_card_pan_in_text(): void
+    {
+        $card = $this->fakeCardPan();
+        $redacted = SensitiveDataRedactor::redactText("Card {$card} was returned.");
+
+        $this->assertSame('Card [REDACTED] was returned.', $redacted);
+        $this->assertStringNotContainsString($card, $redacted);
+    }
+
+    public function test_it_redacts_standalone_card_pan_with_spaces_or_hyphens_in_text(): void
+    {
+        $card = $this->fakeCardPan();
+        $spacedCard = implode(' ', str_split($card, 4));
+        $hyphenatedCard = implode('-', str_split($card, 4));
+        $body = "Cards {$spacedCard} and {$hyphenatedCard} were returned.";
+
+        $redacted = SensitiveDataRedactor::redactText($body);
+
+        $this->assertSame('Cards [REDACTED] and [REDACTED] were returned.', $redacted);
+        $this->assertStringNotContainsString($spacedCard, $redacted);
+        $this->assertStringNotContainsString($hyphenatedCard, $redacted);
+    }
+
+    public function test_it_redacts_standalone_iranian_mobile_number_in_text(): void
+    {
+        $mobile = $this->fakeIranianMobile();
+        $internationalMobile = $this->fakeInternationalIranianMobile();
+        $body = "Mobiles {$mobile} and {$internationalMobile} were returned.";
+
+        $redacted = SensitiveDataRedactor::redactText($body);
+
+        $this->assertSame('Mobiles [REDACTED] and [REDACTED] were returned.', $redacted);
+        $this->assertStringNotContainsString($mobile, $redacted);
+        $this->assertStringNotContainsString($internationalMobile, $redacted);
+    }
+
+    public function test_it_redacts_standalone_iranian_national_code_in_text(): void
+    {
+        $nationalCode = $this->fakeIranianNationalCode();
+        $redacted = SensitiveDataRedactor::redactText("National code {$nationalCode} was returned.");
+
+        $this->assertSame('National code [REDACTED] was returned.', $redacted);
+        $this->assertStringNotContainsString($nationalCode, $redacted);
+    }
+
+    public function test_it_redacts_nested_standalone_sensitive_values(): void
+    {
+        $iban = $this->fakeIranianIban();
+        $card = $this->fakeCardPan();
+        $hyphenatedCard = implode('-', str_split($card, 4));
+        $mobile = $this->fakeInternationalIranianMobile();
+        $nationalCode = $this->fakeIranianNationalCode();
+
+        $customer = (object) [
+            'note' => "Mobile {$mobile} is present.",
+            'safe' => 'visible',
+        ];
+
+        $payload = [
+            'meta' => [
+                'note' => "IBAN {$iban} is present.",
+                'card_note' => "Card {$hyphenatedCard} is present.",
+                'national_code_note' => "National code {$nationalCode} is present.",
+                'numeric_pan' => (int) $card,
+                'customer' => $customer,
+            ],
+        ];
+
+        $redacted = SensitiveDataRedactor::redact($payload);
+
+        $this->assertSame('IBAN [REDACTED] is present.', $redacted['meta']['note']);
+        $this->assertSame('Card [REDACTED] is present.', $redacted['meta']['card_note']);
+        $this->assertSame('National code [REDACTED] is present.', $redacted['meta']['national_code_note']);
+        $this->assertSame('[redacted]', $redacted['meta']['numeric_pan']);
+        $this->assertInstanceOf(\stdClass::class, $redacted['meta']['customer']);
+        $this->assertSame('Mobile [REDACTED] is present.', $redacted['meta']['customer']->note);
+        $this->assertSame('visible', $redacted['meta']['customer']->safe);
+    }
+
+    public function test_it_preserves_normal_non_sensitive_text(): void
+    {
+        $body = 'Status ok, page 42, reference abc-123, and date 2026-06-28.';
+
+        $this->assertSame($body, SensitiveDataRedactor::redactText($body));
+    }
+
     public function test_it_redacts_sensitive_malformed_json_body_values(): void
     {
         $body = implode("\n", [
@@ -434,5 +529,30 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertStringNotContainsString('fake-access-token', $redacted);
         $this->assertStringNotContainsString('fake-refresh-token', $redacted);
         $this->assertStringContainsString('[REDACTED]', $redacted);
+    }
+
+    private function fakeIranianIban(): string
+    {
+        return 'IR'.str_repeat('0', 24);
+    }
+
+    private function fakeCardPan(): string
+    {
+        return '6274'.'1290'.'0000'.'0003';
+    }
+
+    private function fakeIranianMobile(): string
+    {
+        return '09'.'123'.'456'.'789';
+    }
+
+    private function fakeInternationalIranianMobile(): string
+    {
+        return '+98'.'912'.'345'.'6789';
+    }
+
+    private function fakeIranianNationalCode(): string
+    {
+        return '12345'.'67891';
     }
 }

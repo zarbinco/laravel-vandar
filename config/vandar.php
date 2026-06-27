@@ -67,6 +67,8 @@ return [
 
     'logging' => [
         'enabled' => env('VANDAR_LOGGING_ENABLED', false),
+
+        // Defensive best-effort masking for package logs; do not log raw sensitive API responses in production.
         'redact_sensitive_data' => true,
     ],
 ];

@@ -186,7 +186,9 @@ final class SensitiveDataRedactor
             $redacted,
         );
 
-        return is_string($redacted) ? $redacted : $body;
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        return self::redactStandaloneSensitiveValues($redacted, self::TEXT_REDACTED);
     }
 
     /**
@@ -207,10 +209,156 @@ final class SensitiveDataRedactor
                 continue;
             }
 
-            $redacted[$key] = is_array($value) ? self::redactArray($value, $sensitiveKeys) : $value;
+            $redacted[$key] = self::redactValue($value, $sensitiveKeys);
         }
 
         return $redacted;
+    }
+
+    /**
+     * @param  array<string, bool>  $sensitiveKeys
+     */
+    private static function redactValue(mixed $value, array $sensitiveKeys): mixed
+    {
+        if (is_array($value)) {
+            return self::redactArray($value, $sensitiveKeys);
+        }
+
+        if (is_string($value)) {
+            return self::redactStandaloneSensitiveValues($value, self::TEXT_REDACTED);
+        }
+
+        if (is_int($value) && self::isStandaloneSensitiveNumericValue((string) $value)) {
+            return self::REDACTED;
+        }
+
+        if ($value instanceof \stdClass) {
+            return self::redactObject($value, $sensitiveKeys);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param  array<string, bool>  $sensitiveKeys
+     */
+    private static function redactObject(\stdClass $value, array $sensitiveKeys): \stdClass
+    {
+        $redacted = clone $value;
+
+        foreach (get_object_vars($redacted) as $key => $propertyValue) {
+            $normalizedKey = mb_strtolower($key);
+
+            if (array_key_exists($normalizedKey, $sensitiveKeys)) {
+                $redacted->{$key} = self::REDACTED;
+
+                continue;
+            }
+
+            $redacted->{$key} = self::redactValue($propertyValue, $sensitiveKeys);
+        }
+
+        return $redacted;
+    }
+
+    private static function redactStandaloneSensitiveValues(string $body, string $marker): string
+    {
+        $redacted = preg_replace(
+            '/(?<![A-Z0-9])IR(?:[ -]?\d){24}(?![A-Z0-9])/iu',
+            $marker,
+            $body,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace_callback(
+            '/(?<![A-Z0-9])\d(?:[ -]?\d){12,18}(?![A-Z0-9])/iu',
+            static fn (array $matches): string => self::isValidCardPan($matches[0]) ? $marker : $matches[0],
+            $redacted,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace(
+            '/(?<![A-Z0-9+])(?:09\d{9}|\+989\d{9})(?![A-Z0-9])/iu',
+            $marker,
+            $redacted,
+        );
+
+        $redacted = is_string($redacted) ? $redacted : $body;
+
+        $redacted = preg_replace_callback(
+            '/(?<![A-Z0-9+])\d{10}(?![A-Z0-9])/iu',
+            static fn (array $matches): string => self::isValidIranianNationalCode($matches[0]) ? $marker : $matches[0],
+            $redacted,
+        );
+
+        return is_string($redacted) ? $redacted : $body;
+    }
+
+    private static function isStandaloneSensitiveNumericValue(string $value): bool
+    {
+        return self::isValidCardPan($value)
+            || preg_match('/^(?:09\d{9}|\+989\d{9})$/', $value) === 1
+            || self::isValidIranianNationalCode($value);
+    }
+
+    private static function isValidCardPan(string $value): bool
+    {
+        $digits = preg_replace('/[ -]/', '', $value);
+
+        if (! is_string($digits) || preg_match('/^\d{13,19}$/', $digits) !== 1) {
+            return false;
+        }
+
+        if (preg_match('/^(\d)\1+$/', $digits) === 1) {
+            return false;
+        }
+
+        return self::passesLuhnChecksum($digits);
+    }
+
+    private static function isValidIranianNationalCode(string $value): bool
+    {
+        if (preg_match('/^\d{10}$/', $value) !== 1 || preg_match('/^(\d)\1+$/', $value) === 1) {
+            return false;
+        }
+
+        $sum = 0;
+
+        for ($index = 0; $index < 9; $index++) {
+            $sum += ((int) $value[$index]) * (10 - $index);
+        }
+
+        $remainder = $sum % 11;
+        $checksum = (int) $value[9];
+
+        return $remainder < 2
+            ? $checksum === $remainder
+            : $checksum === 11 - $remainder;
+    }
+
+    private static function passesLuhnChecksum(string $digits): bool
+    {
+        $sum = 0;
+        $double = false;
+
+        for ($index = strlen($digits) - 1; $index >= 0; $index--) {
+            $digit = (int) $digits[$index];
+
+            if ($double) {
+                $digit *= 2;
+
+                if ($digit > 9) {
+                    $digit -= 9;
+                }
+            }
+
+            $sum += $digit;
+            $double = ! $double;
+        }
+
+        return $sum % 10 === 0;
     }
 
     private static function bodySensitiveKeyPattern(): string

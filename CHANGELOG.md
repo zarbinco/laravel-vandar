@@ -43,4 +43,5 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 
 - Added recursive sensitive data redaction for tokens, API keys, identity data, card/IBAN data, settlement data, and payment identifiers.
 - Added URL query and sensitive path segment sanitization for package logs.
+- Improved redaction to mask standalone Iranian IBANs, card/PAN numbers, Iranian mobile numbers, and national-code-shaped values in text and nested redaction contexts without changing runtime API behavior.
 - Disabled automatic retries for money-moving endpoints.

@@ -64,9 +64,9 @@ try {
 
 ## Redacted package logging
 
-Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, and dynamic path values before writing request summaries.
+Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, dynamic path values, and detected standalone Iranian IBANs, card/PAN numbers, Iranian mobile numbers, and national-code-shaped values before writing request summaries.
 
-This redaction is a defensive helper. Application logs, audit trails, exception reporters, queue payloads, APM traces, support exports, and database records still need their own review. Debug logging should never include raw tokens, authorization headers, full banking payloads, or raw Vandar responses.
+This redaction is a defensive best-effort helper and this hardening does not change runtime API behavior. Application logs, audit trails, exception reporters, queue payloads, APM traces, support exports, and database records still need their own review. Debug logging should never include raw tokens, authorization headers, full banking payloads, sensitive raw API responses, or raw Vandar responses.
 
 ## IPG callbacks
 

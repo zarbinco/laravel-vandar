@@ -28,9 +28,9 @@ Refresh tokens are especially sensitive because they can be used to obtain new a
 
 ## Logging
 
-Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, and exact dynamic URL path values before writing request summaries.
+Package logging is disabled by default. When enabled, the package redacts known sensitive payload, response, header, query, exact dynamic URL path values, and detected standalone Iranian IBANs, card/PAN numbers, Iranian mobile numbers, and national-code-shaped values before writing request summaries.
 
-This redaction is a defensive helper, not a complete application security policy. Consuming applications must still protect their own logs, audit trails, exception reports, queue payloads, APM traces, and support exports.
+This redaction is a defensive best-effort helper, not a complete application security policy. Do not log sensitive raw API responses directly in production. This hardening does not change runtime API behavior. Consuming applications must still protect their own logs, audit trails, exception reports, queue payloads, APM traces, and support exports.
 
 ## Money-Moving Operations
 
