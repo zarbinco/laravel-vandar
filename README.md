@@ -64,6 +64,7 @@ VANDAR_BUSINESS=
 VANDAR_ACCESS_TOKEN=
 VANDAR_REFRESH_TOKEN=
 VANDAR_TOKEN_STORE=cache
+VANDAR_AUTO_REFRESH=false
 VANDAR_API_URL=https://api.vandar.io
 VANDAR_IPG_URL=https://ipg.vandar.io
 VANDAR_BATCH_URL=https://batch.vandar.io
@@ -90,6 +91,8 @@ php artisan vandar:refresh-token
 ```
 
 The refresh command does not print access tokens or refresh tokens.
+
+`VANDAR_AUTO_REFRESH` defaults to `false` for backward compatibility, so existing applications do not need code changes. If you explicitly set `VANDAR_AUTO_REFRESH=true`, authenticated requests may refresh an expiring token before sending the request, using the existing token refresh, lock, retry, and token store configuration. This depends on a valid refresh token and a token store that can save refreshed tokens. It does not automatically retry every failed API request, and it does not add automatic retries for money-moving calls. In production, you may keep using the scheduled `vandar:refresh-token` command if that is your current strategy, or enable per-request auto-refresh after testing it in your application.
 
 ## Quick Start
 

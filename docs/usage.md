@@ -26,6 +26,7 @@ Useful token refresh and rate-limit settings:
 VANDAR_TOKEN_LOCK_WAIT_SECONDS=5
 VANDAR_TOKEN_REFRESH_ATTEMPTS=3
 VANDAR_TOKEN_REFRESH_RETRY_SLEEP_MS=250
+VANDAR_AUTO_REFRESH=false
 VANDAR_RATE_LIMIT_AWARE=true
 VANDAR_RESPECT_RETRY_AFTER=true
 VANDAR_MAX_RETRY_AFTER_SECONDS=3
@@ -34,6 +35,8 @@ VANDAR_RETRY_MONEY_MOVING_REQUESTS=false
 ```
 
 Token refresh is lock-protected to reduce duplicate refresh calls when many requests hit near token expiry. Vandar also applies request limits; safe methods may be retried once on `429`, while money-moving requests are not retried by default.
+
+`VANDAR_AUTO_REFRESH` defaults to `false` so existing applications keep their current token lifecycle without code changes. When explicitly set to `true`, authenticated requests may refresh an expiring access token before the API request is sent. Auto-refresh uses the configured refresh token, token store, lock, and retry settings; it requires a valid refresh token and a token store that can save refreshed tokens. It does not mean the package retries every failed API request. Production users can continue using a scheduled `vandar:refresh-token` command, or enable `VANDAR_AUTO_REFRESH=true` after testing the behavior with their token store.
 
 In multi-server production deployments, back the `cache` token store with a shared cache such as Redis so refreshed tokens and locks are visible to every worker.
 

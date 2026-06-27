@@ -24,6 +24,8 @@ Package exception context is redacted by the package. Direct response arrays in 
 
 Token refresh is lock-protected when the configured cache store supports locks. Tune lock wait, refresh attempts, and retry sleep through the `VANDAR_TOKEN_*` environment values in `config/vandar.php`.
 
+Per-request token auto-refresh is opt-in with `VANDAR_AUTO_REFRESH=false` by default. Existing applications do not need code changes and may keep using a scheduled `vandar:refresh-token` command. When set to `true`, the package may refresh an expiring token before sending an authenticated request, provided a valid refresh token and writable token store are configured. It does not automatically retry every failed API request.
+
 For multi-server production deployments, use a shared Laravel cache store such as Redis with `VANDAR_TOKEN_STORE=cache` so refreshed tokens and refresh locks are shared across workers.
 
 Rate-limit handling is conservative. Safe methods may respect `Retry-After`, but money-moving retries are disabled by default:

@@ -92,7 +92,7 @@ final class PendingVandarRequest
         }
 
         if ($auth) {
-            $authorizationHeader = $this->app->make(TokenManager::class)->authorizationHeader();
+            $authorizationHeader = $this->app->make(TokenManager::class)->authorizationHeaderForRequest();
 
             if ($authorizationHeader !== null) {
                 $request = $request->withHeaders([

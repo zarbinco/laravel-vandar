@@ -27,6 +27,9 @@ return [
         'refresh_attempts' => (int) env('VANDAR_TOKEN_REFRESH_ATTEMPTS', 3),
         'refresh_retry_sleep_ms' => (int) env('VANDAR_TOKEN_REFRESH_RETRY_SLEEP_MS', 250),
 
+        // Default-off per-request refresh before sending authenticated requests.
+        'auto_refresh' => env('VANDAR_AUTO_REFRESH', false),
+
         // Cache driver stores encrypted payload by default.
         'encrypt_cache' => env('VANDAR_TOKEN_ENCRYPT_CACHE', true),
     ],

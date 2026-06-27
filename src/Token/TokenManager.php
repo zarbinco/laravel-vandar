@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zarbinco\LaravelVandar\Token;
 
+use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
@@ -62,6 +63,32 @@ final class TokenManager
     public function authorizationHeader(): ?string
     {
         return $this->current()?->authorizationHeader();
+    }
+
+    public function authorizationHeaderForRequest(): ?string
+    {
+        if (! $this->autoRefreshForRequests()) {
+            return $this->authorizationHeader();
+        }
+
+        $tokens = $this->current();
+
+        if ($tokens !== null) {
+            if (! $tokens->shouldRefresh(refreshBeforeSeconds: $this->refreshBeforeSeconds())) {
+                return $tokens->authorizationHeader();
+            }
+
+            return $this->refresh()->authorizationHeader();
+        }
+
+        $refreshToken = $this->refreshTokenForRequest();
+
+        if (! is_string($refreshToken) || $refreshToken === '') {
+            return null;
+        }
+
+        return $this->refreshWithOptionalLock($this->refreshOnlyTokenSet($refreshToken), force: false)
+            ->authorizationHeader();
     }
 
     public function hasToken(): bool
@@ -244,6 +271,46 @@ final class TokenManager
         return $this->intConfig('vandar.tokens.refresh_retry_sleep_ms', 250, minimum: 0);
     }
 
+    private function autoRefreshForRequests(): bool
+    {
+        $value = $this->config->get('vandar.tokens.auto_refresh', false);
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $parsed = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+            return is_bool($parsed) ? $parsed : false;
+        }
+
+        if (is_numeric($value)) {
+            return (bool) (int) $value;
+        }
+
+        return false;
+    }
+
+    private function refreshTokenForRequest(): ?string
+    {
+        $refreshToken = $this->store->refreshToken();
+
+        if (is_string($refreshToken) && $refreshToken !== '') {
+            return $refreshToken;
+        }
+
+        $driver = $this->config->get('vandar.tokens.store', 'cache');
+
+        if (! is_string($driver) || strtolower($driver) !== 'cache') {
+            return null;
+        }
+
+        $configRefreshToken = $this->config->get('vandar.tokens.refresh_token');
+
+        return is_string($configRefreshToken) && $configRefreshToken !== '' ? $configRefreshToken : null;
+    }
+
     private function intConfig(string $key, int $default, int $minimum): int
     {
         $value = $this->config->get($key, $default);
@@ -264,6 +331,17 @@ final class TokenManager
 
         return $current->accessToken !== $original->accessToken
             || $current->refreshToken !== $original->refreshToken;
+    }
+
+    private function refreshOnlyTokenSet(string $refreshToken): TokenSet
+    {
+        return new TokenSet(
+            tokenType: 'Bearer',
+            accessToken: '',
+            refreshToken: $refreshToken,
+            expiresIn: 0,
+            expiresAt: CarbonImmutable::now(),
+        );
     }
 
     private function refreshLock(): mixed

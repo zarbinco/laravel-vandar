@@ -30,6 +30,11 @@ final class ConfigTest extends TestCase
         $this->assertFalse(config('vandar.logging.enabled'));
     }
 
+    public function test_token_auto_refresh_is_disabled_by_default(): void
+    {
+        $this->assertFalse(config('vandar.tokens.auto_refresh'));
+    }
+
     public function test_unknown_base_url_key_throws_exception(): void
     {
         $this->expectException(VandarException::class);
