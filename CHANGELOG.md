@@ -22,6 +22,8 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Added focused token refresh, cache token store, HTTP retry, timeout, and unsafe money-moving retry tests.
 - Added a production-oriented Laravel payment integration example for safe application-side IPG usage.
 - Added opt-in per-request token auto-refresh through `VANDAR_AUTO_REFRESH=false` by default.
+- Added `VANDAR_ACCESS_TOKEN_EXPIRES_AT` for real config fallback token expiry timestamps.
+- Added `VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE=false` to optionally seed the cache token store from config fallback tokens.
 
 ### Changed
 

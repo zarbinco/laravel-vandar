@@ -63,8 +63,10 @@ Set the values your application needs. These names match `config/vandar.php`; ex
 VANDAR_BUSINESS=
 VANDAR_ACCESS_TOKEN=
 VANDAR_REFRESH_TOKEN=
+VANDAR_ACCESS_TOKEN_EXPIRES_AT=
 VANDAR_TOKEN_STORE=cache
 VANDAR_AUTO_REFRESH=false
+VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE=false
 VANDAR_API_URL=https://api.vandar.io
 VANDAR_IPG_URL=https://ipg.vandar.io
 VANDAR_BATCH_URL=https://batch.vandar.io
@@ -84,6 +86,8 @@ Supported token stores are `config`, `cache`, and `custom`. The cache store encr
 
 For multi-server production deployments, use a shared Laravel cache store such as Redis for `VANDAR_TOKEN_STORE=cache` so refreshed tokens and refresh locks are shared across workers.
 
+Env/config token fallback remains supported and is useful as a bootstrap or development convenience. `VANDAR_ACCESS_TOKEN_EXPIRES_AT` can provide a real access-token expiry timestamp, using an ISO 8601 datetime or Unix timestamp. If it is missing or invalid, the existing `VANDAR_ACCESS_TOKEN_TTL_SECONDS` behavior is preserved. `VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE` defaults to `false`; when set to `true` with the cache token store, initial config fallback tokens can be written into cache on first read so later reads use cached token state. Existing applications do not need code changes unless they want this behavior.
+
 Refresh the configured access token:
 
 ```bash
@@ -93,6 +97,8 @@ php artisan vandar:refresh-token
 The refresh command does not print access tokens or refresh tokens.
 
 `VANDAR_AUTO_REFRESH` defaults to `false` for backward compatibility, so existing applications do not need code changes. If you explicitly set `VANDAR_AUTO_REFRESH=true`, authenticated requests may refresh an expiring token before sending the request, using the existing token refresh, lock, retry, and token store configuration. This depends on a valid refresh token and a token store that can save refreshed tokens. It does not automatically retry every failed API request, and it does not add automatic retries for money-moving calls. In production, you may keep using the scheduled `vandar:refresh-token` command if that is your current strategy, or enable per-request auto-refresh after testing it in your application.
+
+For production, prefer the cache token store with the scheduled refresh command, or the cache token store with explicitly enabled `VANDAR_AUTO_REFRESH=true` after testing. Env/config fallback tokens should not be your only long-term production token lifecycle unless your application has a deliberate process for rotating them.
 
 ## Quick Start
 

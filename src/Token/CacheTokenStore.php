@@ -42,7 +42,7 @@ final class CacheTokenStore implements TokenStore
             }
         }
 
-        return $this->fallbackTokens();
+        return $this->fallbackTokens(persist: $this->shouldPersistConfigFallbackToCache());
     }
 
     public function save(TokenSet $tokens): void
@@ -92,13 +92,20 @@ final class CacheTokenStore implements TokenStore
         }
     }
 
-    private function fallbackTokens(): ?TokenSet
+    private function fallbackTokens(bool $persist = false): ?TokenSet
     {
-        return TokenSet::fromConfig(
+        $tokens = TokenSet::fromConfigWithExpiry(
             $this->configToken('access_token'),
             $this->configToken('refresh_token'),
             $this->accessTokenTtlSeconds(),
+            $this->accessTokenExpiresAt(),
         );
+
+        if ($persist && $tokens !== null) {
+            $this->save($tokens);
+        }
+
+        return $tokens;
     }
 
     private function configToken(string $key): ?string
@@ -129,6 +136,32 @@ final class CacheTokenStore implements TokenStore
         $ttl = $this->config->get('vandar.tokens.access_token_ttl_seconds');
 
         return is_numeric($ttl) ? (int) $ttl : null;
+    }
+
+    private function accessTokenExpiresAt(): mixed
+    {
+        return $this->config->get('vandar.tokens.access_token_expires_at');
+    }
+
+    private function shouldPersistConfigFallbackToCache(): bool
+    {
+        $value = $this->config->get('vandar.tokens.persist_config_fallback_to_cache', false);
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $parsed = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+            return is_bool($parsed) ? $parsed : false;
+        }
+
+        if (is_numeric($value)) {
+            return (bool) (int) $value;
+        }
+
+        return false;
     }
 
     private function shouldEncryptCache(): bool

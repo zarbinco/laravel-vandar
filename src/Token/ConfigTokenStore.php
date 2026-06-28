@@ -31,10 +31,11 @@ final class ConfigTokenStore implements TokenStore
 
     public function tokens(): ?TokenSet
     {
-        return TokenSet::fromConfig(
+        return TokenSet::fromConfigWithExpiry(
             $this->accessToken(),
             $this->refreshToken(),
             $this->accessTokenTtlSeconds(),
+            $this->accessTokenExpiresAt(),
         );
     }
 
@@ -53,5 +54,10 @@ final class ConfigTokenStore implements TokenStore
         $ttl = $this->config->get('vandar.tokens.access_token_ttl_seconds');
 
         return is_numeric($ttl) ? (int) $ttl : null;
+    }
+
+    private function accessTokenExpiresAt(): mixed
+    {
+        return $this->config->get('vandar.tokens.access_token_expires_at');
     }
 }

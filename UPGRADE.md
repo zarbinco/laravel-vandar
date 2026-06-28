@@ -26,6 +26,8 @@ Token refresh is lock-protected when the configured cache store supports locks. 
 
 Per-request token auto-refresh is opt-in with `VANDAR_AUTO_REFRESH=false` by default. Existing applications do not need code changes and may keep using a scheduled `vandar:refresh-token` command. When set to `true`, the package may refresh an expiring token before sending an authenticated request, provided a valid refresh token and writable token store are configured. It does not automatically retry every failed API request.
 
+Env/config fallback tokens remain supported. `VANDAR_ACCESS_TOKEN_EXPIRES_AT` can provide a real expiry timestamp for fallback access tokens, and `VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE=false` can be explicitly enabled to seed the cache token store from config fallback tokens on first read. These options are opt-in; existing applications do not need code changes.
+
 For multi-server production deployments, use a shared Laravel cache store such as Redis with `VANDAR_TOKEN_STORE=cache` so refreshed tokens and refresh locks are shared across workers.
 
 Rate-limit handling is conservative. Safe methods may respect `Retry-After`, but money-moving retries are disabled by default:

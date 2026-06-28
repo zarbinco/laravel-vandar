@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zarbinco\LaravelVandar\Tests\Feature;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -30,6 +31,26 @@ final class TokenAutoRefreshTest extends TestCase
     public function test_pending_request_uses_current_token_and_does_not_refresh_expiring_token_by_default(): void
     {
         config()->set('vandar.tokens.access_token_ttl_seconds', 60);
+
+        Http::fake([
+            'https://api.vandar.io/v3/refreshtoken' => Http::response([
+                'access_token' => 'fake-refreshed-access-token',
+                'refresh_token' => 'fake-refreshed-refresh-token',
+            ], 200),
+            'https://api.vandar.io/v2/manual*' => Http::response(['ok' => true], 200),
+        ]);
+
+        $this->app->make(VandarClient::class)->get('api', '/v2/manual');
+
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v2/manual'
+            && $request->hasHeader('Authorization', 'Bearer fake-current-access-token'));
+    }
+
+    public function test_auto_refresh_disabled_does_not_refresh_expired_config_fallback_timestamp(): void
+    {
+        config()->set('vandar.tokens.access_token_ttl_seconds', 7200);
+        config()->set('vandar.tokens.access_token_expires_at', CarbonImmutable::now()->subMinute()->toIso8601String());
 
         Http::fake([
             'https://api.vandar.io/v3/refreshtoken' => Http::response([
@@ -94,6 +115,20 @@ final class TokenAutoRefreshTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_request_authorization_method_does_not_refresh_fresh_config_expiry_when_enabled(): void
+    {
+        config()->set('vandar.tokens.auto_refresh', true);
+        config()->set('vandar.tokens.access_token_ttl_seconds', 60);
+        config()->set('vandar.tokens.access_token_expires_at', CarbonImmutable::now()->addHours(2)->toIso8601String());
+
+        Http::fake();
+
+        $header = $this->app->make(TokenManager::class)->authorizationHeaderForRequest();
+
+        $this->assertSame('Bearer fake-current-access-token', $header);
+        Http::assertNothingSent();
+    }
+
     public function test_request_authorization_method_refreshes_expiring_token_when_enabled(): void
     {
         config()->set('vandar.tokens.auto_refresh', true);
@@ -114,6 +149,29 @@ final class TokenAutoRefreshTest extends TestCase
         Http::assertSentCount(1);
         Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v3/refreshtoken'
             && ! $request->hasHeader('Authorization')
+            && $request['refreshtoken'] === 'fake-current-refresh-token');
+    }
+
+    public function test_request_authorization_method_refreshes_expired_config_expiry_when_enabled(): void
+    {
+        config()->set('vandar.tokens.auto_refresh', true);
+        config()->set('vandar.tokens.access_token_ttl_seconds', 7200);
+        config()->set('vandar.tokens.access_token_expires_at', CarbonImmutable::now()->subMinute()->toIso8601String());
+
+        Http::fake([
+            'https://api.vandar.io/v3/refreshtoken' => Http::response([
+                'token_type' => 'Bearer',
+                'access_token' => 'fake-refreshed-access-token',
+                'refresh_token' => 'fake-refreshed-refresh-token',
+                'expires_in' => 7200,
+            ], 200),
+        ]);
+
+        $header = $this->app->make(TokenManager::class)->authorizationHeaderForRequest();
+
+        $this->assertSame('Bearer fake-refreshed-access-token', $header);
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.vandar.io/v3/refreshtoken'
             && $request['refreshtoken'] === 'fake-current-refresh-token');
     }
 

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Zarbinco\LaravelVandar\DTO;
 
 use Carbon\CarbonImmutable;
+use DateTimeInterface;
+use Throwable;
 use Zarbinco\LaravelVandar\Exceptions\VandarTokenException;
 use Zarbinco\LaravelVandar\Support\SensitiveDataRedactor;
 
@@ -55,17 +57,55 @@ final readonly class TokenSet
 
     public static function fromConfig(?string $accessToken, ?string $refreshToken, ?int $expiresIn = null): ?self
     {
+        return self::fromConfigWithExpiry($accessToken, $refreshToken, $expiresIn, null);
+    }
+
+    public static function fromConfigWithExpiry(?string $accessToken, ?string $refreshToken, ?int $expiresIn = null, mixed $expiresAt = null): ?self
+    {
         if (! is_string($accessToken) || $accessToken === '' || ! is_string($refreshToken) || $refreshToken === '') {
             return null;
         }
+
+        $configuredExpiresAt = self::configExpiresAt($expiresAt);
 
         return new self(
             tokenType: 'Bearer',
             accessToken: $accessToken,
             refreshToken: $refreshToken,
             expiresIn: $expiresIn,
-            expiresAt: $expiresIn === null ? null : CarbonImmutable::now()->addSeconds($expiresIn),
+            expiresAt: $configuredExpiresAt ?? ($expiresIn === null ? null : CarbonImmutable::now()->addSeconds($expiresIn)),
         );
+    }
+
+    private static function configExpiresAt(mixed $expiresAt): ?CarbonImmutable
+    {
+        if ($expiresAt instanceof DateTimeInterface) {
+            return CarbonImmutable::instance($expiresAt);
+        }
+
+        if (is_int($expiresAt)) {
+            return CarbonImmutable::createFromTimestamp($expiresAt);
+        }
+
+        if (is_string($expiresAt)) {
+            $expiresAt = trim($expiresAt);
+
+            if ($expiresAt === '') {
+                return null;
+            }
+
+            if (ctype_digit($expiresAt)) {
+                return CarbonImmutable::createFromTimestamp((int) $expiresAt);
+            }
+
+            try {
+                return CarbonImmutable::parse($expiresAt);
+            } catch (Throwable) {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     public function authorizationHeader(): string

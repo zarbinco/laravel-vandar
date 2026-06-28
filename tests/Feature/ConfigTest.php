@@ -35,6 +35,12 @@ final class ConfigTest extends TestCase
         $this->assertFalse(config('vandar.tokens.auto_refresh'));
     }
 
+    public function test_config_fallback_token_lifecycle_options_are_disabled_by_default(): void
+    {
+        $this->assertNull(config('vandar.tokens.access_token_expires_at'));
+        $this->assertFalse(config('vandar.tokens.persist_config_fallback_to_cache'));
+    }
+
     public function test_unknown_base_url_key_throws_exception(): void
     {
         $this->expectException(VandarException::class);

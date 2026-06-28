@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Zarbinco\LaravelVandar\Tests\Unit;
 
 use Carbon\CarbonImmutable;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Zarbinco\LaravelVandar\DTO\TokenSet;
 
@@ -29,6 +30,83 @@ final class TokenSetTest extends TestCase
     {
         $this->assertNull(TokenSet::fromConfig(null, 'fake-refresh-token'));
         $this->assertNull(TokenSet::fromConfig('fake-access-token', null));
+    }
+
+    public function test_from_config_keeps_existing_expires_in_behavior(): void
+    {
+        $before = CarbonImmutable::now()->addSeconds(3600);
+
+        $tokens = TokenSet::fromConfig('fake-access-token', 'fake-refresh-token', 3600);
+
+        $after = CarbonImmutable::now()->addSeconds(3600);
+
+        $this->assertNotNull($tokens);
+        $this->assertSame(3600, $tokens->expiresIn);
+        $this->assertNotNull($tokens->expiresAt);
+        $this->assertTrue($tokens->expiresAt->betweenIncluded($before, $after));
+    }
+
+    public function test_from_config_with_expiry_accepts_iso_8601_datetime_string(): void
+    {
+        $expiresAt = CarbonImmutable::parse('2026-07-01T12:30:00+00:00');
+
+        $tokens = TokenSet::fromConfigWithExpiry(
+            'fake-access-token',
+            'fake-refresh-token',
+            3600,
+            $expiresAt->toIso8601String(),
+        );
+
+        $this->assertNotNull($tokens);
+        $this->assertTrue($expiresAt->equalTo($tokens->expiresAt));
+    }
+
+    public function test_from_config_with_expiry_accepts_unix_timestamp(): void
+    {
+        $expiresAt = CarbonImmutable::parse('2026-07-01T12:30:00+00:00');
+
+        $tokens = TokenSet::fromConfigWithExpiry(
+            'fake-access-token',
+            'fake-refresh-token',
+            3600,
+            (string) $expiresAt->timestamp,
+        );
+
+        $this->assertNotNull($tokens);
+        $this->assertTrue($expiresAt->equalTo($tokens->expiresAt));
+    }
+
+    public function test_from_config_with_expiry_accepts_datetime_interface(): void
+    {
+        $expiresAt = new DateTimeImmutable('2026-07-01T12:30:00+00:00');
+
+        $tokens = TokenSet::fromConfigWithExpiry(
+            'fake-access-token',
+            'fake-refresh-token',
+            3600,
+            $expiresAt,
+        );
+
+        $this->assertNotNull($tokens);
+        $this->assertTrue(CarbonImmutable::instance($expiresAt)->equalTo($tokens->expiresAt));
+    }
+
+    public function test_from_config_with_invalid_expiry_falls_back_to_expires_in(): void
+    {
+        $before = CarbonImmutable::now()->addSeconds(3600);
+
+        $tokens = TokenSet::fromConfigWithExpiry(
+            'fake-access-token',
+            'fake-refresh-token',
+            3600,
+            'not-a-valid-token-expiry',
+        );
+
+        $after = CarbonImmutable::now()->addSeconds(3600);
+
+        $this->assertNotNull($tokens);
+        $this->assertNotNull($tokens->expiresAt);
+        $this->assertTrue($tokens->expiresAt->betweenIncluded($before, $after));
     }
 
     public function test_authorization_header_uses_token_type(): void

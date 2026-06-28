@@ -13,6 +13,9 @@ return [
         'store' => env('VANDAR_TOKEN_STORE', 'cache'),
         'cache_key' => env('VANDAR_TOKEN_CACHE_KEY', 'vandar.tokens'),
 
+        // Optional real expiry timestamp for config fallback tokens.
+        'access_token_expires_at' => env('VANDAR_ACCESS_TOKEN_EXPIRES_AT'),
+
         // Used by cache store and refresh scheduling helpers.
         'access_token_ttl_seconds' => (int) env('VANDAR_ACCESS_TOKEN_TTL_SECONDS', 432000),
         'refresh_token_ttl_seconds' => (int) env('VANDAR_REFRESH_TOKEN_TTL_SECONDS', 864000),
@@ -29,6 +32,9 @@ return [
 
         // Default-off per-request refresh before sending authenticated requests.
         'auto_refresh' => env('VANDAR_AUTO_REFRESH', false),
+
+        // Default-off persistence of config fallback tokens into cache store.
+        'persist_config_fallback_to_cache' => env('VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE', false),
 
         // Cache driver stores encrypted payload by default.
         'encrypt_cache' => env('VANDAR_TOKEN_ENCRYPT_CACHE', true),
