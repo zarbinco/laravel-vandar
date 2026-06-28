@@ -29,6 +29,7 @@ VANDAR_TOKEN_REFRESH_RETRY_SLEEP_MS=250
 VANDAR_ACCESS_TOKEN_EXPIRES_AT=
 VANDAR_AUTO_REFRESH=false
 VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE=false
+VANDAR_IBAN_DELETE_ENDPOINT_STYLE=path
 VANDAR_RATE_LIMIT_AWARE=true
 VANDAR_RESPECT_RETRY_AFTER=true
 VANDAR_MAX_RETRY_AFTER_SECONDS=3
@@ -137,6 +138,8 @@ $iban = Vandar::ibans()->create('fake-customer-id', [
     'track_id' => 'fake-track-id',
 ]);
 ```
+
+`VANDAR_IBAN_DELETE_ENDPOINT_STYLE=path` is the default and keeps the existing delete endpoint shape: `DELETE /v3/business/{business}/customers/{customer}/ibans/{iban}`. Set `VANDAR_IBAN_DELETE_ENDPOINT_STYLE=documented` only if you want the alternative style shown in some Vandar documentation: `DELETE /v3/business/{business}/customers/{customer}/ibans` with the IBAN sent in the DELETE request body. Existing apps do not need code changes, and the documented style should be manually verified against the real Vandar API before production use.
 
 ## Inquiries
 

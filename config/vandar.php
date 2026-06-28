@@ -52,6 +52,11 @@ return [
         'callback_url' => env('VANDAR_IPG_CALLBACK_URL'),
     ],
 
+    'iban' => [
+        // Supported styles: path, documented. Default keeps existing /ibans/{iban} behavior.
+        'delete_endpoint_style' => env('VANDAR_IBAN_DELETE_ENDPOINT_STYLE', 'path'),
+    ],
+
     'http' => [
         'timeout' => (int) env('VANDAR_HTTP_TIMEOUT', 20),
         'connect_timeout' => (int) env('VANDAR_HTTP_CONNECT_TIMEOUT', 10),

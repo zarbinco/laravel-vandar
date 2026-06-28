@@ -41,6 +41,11 @@ final class ConfigTest extends TestCase
         $this->assertFalse(config('vandar.tokens.persist_config_fallback_to_cache'));
     }
 
+    public function test_iban_delete_endpoint_style_defaults_to_path(): void
+    {
+        $this->assertSame('path', config('vandar.iban.delete_endpoint_style'));
+    }
+
     public function test_unknown_base_url_key_throws_exception(): void
     {
         $this->expectException(VandarException::class);

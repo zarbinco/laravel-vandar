@@ -30,6 +30,10 @@ Env/config fallback tokens remain supported. `VANDAR_ACCESS_TOKEN_EXPIRES_AT` ca
 
 For multi-server production deployments, use a shared Laravel cache store such as Redis with `VANDAR_TOKEN_STORE=cache` so refreshed tokens and refresh locks are shared across workers.
 
+### IBAN delete endpoint strategy
+
+`VANDAR_IBAN_DELETE_ENDPOINT_STYLE=path` is the default and preserves the existing `/ibans/{iban}` delete endpoint. Existing applications do not need code changes. `VANDAR_IBAN_DELETE_ENDPOINT_STYLE=documented` opts into the alternative `/ibans` endpoint shape shown in some Vandar documentation and sends the IBAN in the DELETE request body. Manually verify that documented style against the real Vandar API before production use.
+
 Rate-limit handling is conservative. Safe methods may respect `Retry-After`, but money-moving retries are disabled by default:
 
 ```env

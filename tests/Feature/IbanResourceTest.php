@@ -6,9 +6,13 @@ namespace Zarbinco\LaravelVandar\Tests\Feature;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use ReflectionMethod;
 use Zarbinco\LaravelVandar\DTO\VandarResponse;
 use Zarbinco\LaravelVandar\Exceptions\VandarBusinessNotConfiguredException;
 use Zarbinco\LaravelVandar\Facades\Vandar;
+use Zarbinco\LaravelVandar\Http\VandarClient;
+use Zarbinco\LaravelVandar\Resources\IbanResource;
+use Zarbinco\LaravelVandar\Support\BusinessResolver;
 use Zarbinco\LaravelVandar\Tests\TestCase;
 
 final class IbanResourceTest extends TestCase
@@ -63,6 +67,86 @@ final class IbanResourceTest extends TestCase
 
     public function test_delete_calls_customer_iban_endpoint(): void
     {
+        Http::fake(['https://api.vandar.io/*' => Http::response([], 204)]);
+
+        Vandar::ibans()->delete('fake-customer-id', 'fake-iban');
+
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'DELETE'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/ibans/fake-iban');
+    }
+
+    public function test_delete_method_signature_remains_unchanged(): void
+    {
+        $method = new ReflectionMethod(IbanResource::class, 'delete');
+        $parameters = $method->getParameters();
+
+        $this->assertCount(3, $parameters);
+        $this->assertSame('customer', $parameters[0]->getName());
+        $this->assertSame('iban', $parameters[1]->getName());
+        $this->assertSame('business', $parameters[2]->getName());
+        $this->assertTrue($parameters[2]->isDefaultValueAvailable());
+        $this->assertNull($parameters[2]->getDefaultValue());
+    }
+
+    public function test_can_be_instantiated_with_old_two_argument_constructor(): void
+    {
+        $this->assertInstanceOf(IbanResource::class, $this->makeIbanResourceWithOldConstructor());
+    }
+
+    public function test_old_two_argument_constructor_uses_default_path_delete_endpoint_style(): void
+    {
+        Http::fake(['https://api.vandar.io/*' => Http::response([], 204)]);
+
+        $this->makeIbanResourceWithOldConstructor()->delete('fake-customer-id', 'fake-iban');
+
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'DELETE'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/ibans/fake-iban');
+    }
+
+    public function test_old_two_argument_constructor_uses_documented_delete_endpoint_style_without_manual_config_argument(): void
+    {
+        config()->set('vandar.iban.delete_endpoint_style', 'documented');
+
+        Http::fake(['https://api.vandar.io/*' => Http::response([], 204)]);
+
+        $this->makeIbanResourceWithOldConstructor()->delete('fake-customer-id', 'fake-iban');
+
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'DELETE'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/ibans'
+            && $request['iban'] === 'fake-iban');
+    }
+
+    public function test_path_delete_endpoint_style_uses_customer_iban_endpoint(): void
+    {
+        config()->set('vandar.iban.delete_endpoint_style', 'path');
+
+        Http::fake(['https://api.vandar.io/*' => Http::response([], 204)]);
+
+        Vandar::ibans()->delete('fake-customer-id', 'fake-iban');
+
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'DELETE'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/ibans/fake-iban'
+            && $request->hasHeader('Authorization', 'Bearer fake-access-token'));
+    }
+
+    public function test_documented_delete_endpoint_style_uses_customer_ibans_endpoint_with_body(): void
+    {
+        config()->set('vandar.iban.delete_endpoint_style', 'documented');
+
+        Http::fake(['https://api.vandar.io/*' => Http::response([], 204)]);
+
+        Vandar::ibans()->delete('fake-customer-id', 'fake-iban');
+
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'DELETE'
+            && $request->url() === 'https://api.vandar.io/v3/business/test-business/customers/fake-customer-id/ibans'
+            && $request['iban'] === 'fake-iban'
+            && $request->hasHeader('Authorization', 'Bearer fake-access-token'));
+    }
+
+    public function test_invalid_delete_endpoint_style_safely_uses_path_endpoint(): void
+    {
+        config()->set('vandar.iban.delete_endpoint_style', 'unknown-style');
+
         Http::fake(['https://api.vandar.io/*' => Http::response([], 204)]);
 
         Vandar::ibans()->delete('fake-customer-id', 'fake-iban');
@@ -140,5 +224,13 @@ final class IbanResourceTest extends TestCase
 
         $this->assertInstanceOf(VandarResponse::class, $response);
         $this->assertSame(422, $response->status());
+    }
+
+    private function makeIbanResourceWithOldConstructor(): IbanResource
+    {
+        return new IbanResource(
+            $this->app->make(VandarClient::class),
+            $this->app->make(BusinessResolver::class),
+        );
     }
 }

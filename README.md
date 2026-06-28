@@ -67,6 +67,7 @@ VANDAR_ACCESS_TOKEN_EXPIRES_AT=
 VANDAR_TOKEN_STORE=cache
 VANDAR_AUTO_REFRESH=false
 VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE=false
+VANDAR_IBAN_DELETE_ENDPOINT_STYLE=path
 VANDAR_API_URL=https://api.vandar.io
 VANDAR_IPG_URL=https://ipg.vandar.io
 VANDAR_BATCH_URL=https://batch.vandar.io
@@ -99,6 +100,8 @@ The refresh command does not print access tokens or refresh tokens.
 `VANDAR_AUTO_REFRESH` defaults to `false` for backward compatibility, so existing applications do not need code changes. If you explicitly set `VANDAR_AUTO_REFRESH=true`, authenticated requests may refresh an expiring token before sending the request, using the existing token refresh, lock, retry, and token store configuration. This depends on a valid refresh token and a token store that can save refreshed tokens. It does not automatically retry every failed API request, and it does not add automatic retries for money-moving calls. In production, you may keep using the scheduled `vandar:refresh-token` command if that is your current strategy, or enable per-request auto-refresh after testing it in your application.
 
 For production, prefer the cache token store with the scheduled refresh command, or the cache token store with explicitly enabled `VANDAR_AUTO_REFRESH=true` after testing. Env/config fallback tokens should not be your only long-term production token lifecycle unless your application has a deliberate process for rotating them.
+
+IBAN delete endpoint style is configurable through `VANDAR_IBAN_DELETE_ENDPOINT_STYLE`. The default `path` keeps the existing `/ibans/{iban}` behavior for backward compatibility, so existing applications do not need code changes. The `documented` style uses `/ibans` and sends the IBAN in the DELETE request body because some Vandar documentation shows the delete endpoint without the IBAN path segment. Manually verify the real Vandar API behavior for `documented` style before using it in production. This setting does not change token, redaction, or other resource endpoint behavior.
 
 ## Quick Start
 

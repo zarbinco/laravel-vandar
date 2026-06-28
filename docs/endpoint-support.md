@@ -16,7 +16,7 @@ Current notes:
 - Customer authentication and customer cash-in-code endpoints are supported.
 - Subscription / Direct Debit endpoints are supported through `Vandar::subscriptions()`, `Vandar::subscription()`, and `Vandar::directDebit()`. Merchant or account activation may be required on Vandar's side.
 - Ravand remains a future module and is not advertised as supported.
-- Customer IBAN delete path ambiguity remains documented in the matrix below.
+- Customer IBAN delete path ambiguity remains documented in the matrix below. The package defaults to the existing `/ibans/:iban` path style and offers an opt-in documented style.
 - Endpoint support means the SDK/client method exists. It does not mean this package provides payment, invoice, wallet, order, reconciliation, or logging workflows.
 
 | Service area | Official endpoint / method | Package resource / method | Status | Notes |
@@ -69,8 +69,8 @@ Current notes:
 | Customer cards | `POST /v3/business/:business/customers/:customer/cards/to-iban` | `CardResource::toIban()` | supported |  |
 | Customer IBANs | `POST /v3/business/:business/customers/:customer/ibans` | `IbanResource::create()` | supported |  |
 | Customer IBANs | `GET /v3/business/:business/customers/:customer/ibans` | `IbanResource::list()` / `all()` | supported |  |
-| Customer IBANs | `DELETE /v3/business/:business/customers/:customer/ibans` | none matching exact path | docs ambiguity | Package currently deletes a specific IBAN at `/ibans/:iban`; official facts list delete without `:iban`. Current behavior is locked by contract tests and not changed here. |
-| Customer IBANs | `DELETE /v3/business/:business/customers/:customer/ibans/:iban` | `IbanResource::delete()` | docs ambiguity | Package-supported path differs from the official facts supplied for this audit. |
+| Customer IBANs | `DELETE /v3/business/:business/customers/:customer/ibans` | `IbanResource::delete()` with `VANDAR_IBAN_DELETE_ENDPOINT_STYLE=documented` | docs ambiguity | Sends the IBAN in the DELETE request body. Manually verify real Vandar API behavior before production use. |
+| Customer IBANs | `DELETE /v3/business/:business/customers/:customer/ibans/:iban` | `IbanResource::delete()` with default `VANDAR_IBAN_DELETE_ENDPOINT_STYLE=path` | docs ambiguity | Default package behavior is preserved for backward compatibility. |
 | Customer IBANs | `POST /v3/business/:business/customers/:customer/ibans/:iban/inquiry` | `IbanResource::inquiry()` | supported |  |
 | Customer IBANs | `POST /v3/business/:business/customers/:customer/ibans/:iban/set-default` | `IbanResource::setDefault()` | supported |  |
 | Inquiries | `POST /v3/business/:business/customers/inquiry/kyc` | `InquiryResource::kyc()` | supported | The package returns Vandar responses as-is, including any business mismatch `400` responses. |

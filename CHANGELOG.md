@@ -24,6 +24,7 @@ All notable changes to `zarbinco/laravel-vandar` will be documented in this file
 - Added opt-in per-request token auto-refresh through `VANDAR_AUTO_REFRESH=false` by default.
 - Added `VANDAR_ACCESS_TOKEN_EXPIRES_AT` for real config fallback token expiry timestamps.
 - Added `VANDAR_PERSIST_CONFIG_FALLBACK_TO_CACHE=false` to optionally seed the cache token store from config fallback tokens.
+- Added `VANDAR_IBAN_DELETE_ENDPOINT_STYLE=path` with opt-in `documented` style for the ambiguous customer IBAN delete endpoint.
 
 ### Changed
 
