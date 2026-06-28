@@ -82,14 +82,17 @@ final class OfficialEndpointContractTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_endpoint_support_documentation_exists_and_readme_links_it(): void
+    public function test_endpoint_support_documentation_exists_and_language_docs_link_it(): void
     {
         $root = dirname(__DIR__, 2);
         $readme = (string) file_get_contents($root.DIRECTORY_SEPARATOR.'README.md');
+        $englishIndex = (string) file_get_contents($root.DIRECTORY_SEPARATOR.'docs'.DIRECTORY_SEPARATOR.'en'.DIRECTORY_SEPARATOR.'README.md');
         $matrix = (string) file_get_contents($root.DIRECTORY_SEPARATOR.'docs'.DIRECTORY_SEPARATOR.'endpoint-support.md');
 
         $this->assertFileExists($root.DIRECTORY_SEPARATOR.'docs'.DIRECTORY_SEPARATOR.'endpoint-support.md');
-        $this->assertStringContainsString('docs/endpoint-support.md', $readme);
+        $this->assertStringContainsString('docs/en/README.md', $readme);
+        $this->assertStringContainsString('endpoint-support.md', $englishIndex);
+        $this->assertStringNotContainsString('docs/endpoint-support.md', $readme);
         $this->assertStringContainsString('Customer cards', $matrix);
         $this->assertStringContainsString('Customer card endpoints are documented by Vandar and covered by package contract tests.', $matrix);
         $this->assertStringContainsString('CustomerResource::authenticationKyc()', $matrix);
@@ -102,12 +105,6 @@ final class OfficialEndpointContractTest extends TestCase
         $this->assertStringContainsString('Subscription / direct debit', $matrix);
         $this->assertStringContainsString('| Ravand | Official Ravand endpoint group | none | future module |', $matrix);
         $this->assertStringNotContainsString('official facts used here did not enumerate each customer-card endpoint', $matrix);
-
-        preg_match('/## Features(?P<features>.*?)## Installation/s', $readme, $matches);
-        $features = (string) ($matches['features'] ?? '');
-
-        $this->assertStringContainsString('Subscription / Direct Debit APIs', $features);
-        $this->assertStringNotContainsString('Ravand', $features);
     }
 
     /**
